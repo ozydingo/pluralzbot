@@ -79,16 +79,17 @@ function userHeaders(token) {
   };
 }
 
-function suggestPluralz({ channel }) {
+function suggestPluralz({ user, channel }) {
   // TODO: use postEphemeral with interactive component the install app
   // Or, not ephemeral because that's more fun
   axios({
     method: 'POST',
-    url: 'https://slack.com/api/chat.postMessage',
+    url: 'https://slack.com/api/chat.postEphemeral',
     headers: botHeaders,
     data: {
       text: 'Hi therez! It lookz like you may have made some errorz in spelling plural words. Would you like to correct your mistakez by using "z" for pluralz?',
-      channel: channel
+      channel: channel,
+      user: user,
     },
   }).then(response => console.log("Response for suggestion:", response.data));
 }
