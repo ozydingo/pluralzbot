@@ -2,6 +2,7 @@ const BOT_TOKEN = process.env["BOT_TOKEN"];
 const channel = process.env["TEST_CHANNEL"];
 
 const axios = require('axios');
+const users = require('./users');
 
 const botHeaders = {
   "Authorization": `Bearer ${BOT_TOKEN}`,
@@ -43,14 +44,15 @@ function eventInScope(event) {
   return true
 }
 
-function getUserToken(user) {
-  // TODO: Look up from db store based on `user`
-  return null;
-}
+async function handlePluralz(event) {
+  const { user: userId } = event;
 
-function handlePluralz(event) {
-  const { user } = event;
-  const token = getUserToken(user);
+  const user = await users.find(userId);
+  if (user && user.participation === 'ignore') {
+    return;
+  }
+
+  const token = user.token;
   if (token) {
     postPluralz(event, token);
   } else {
