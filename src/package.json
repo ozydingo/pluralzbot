@@ -1,5 +1,5 @@
 {
-  "name": "sample-http",
+  "name": "pluralzbot",
   "version": "0.0.1",
   "dependencies": {
     "@google-cloud/firestore": "^2.4.0",
