@@ -4,10 +4,43 @@ const COLLECTION_NAME = '3playaz';
 const firestore = new Firestore({
   projectId: PROJECTID,
 });
+const collection = firestore.collection(COLLECTION_NAME);
 
-exports.find = async (id) => {
-  const result = await firestore.collection(COLLECTION_NAME).where(
-    'user_id', '==', String(id)
+async function find(userId) {
+  const result = await collection.where(
+    'user_id', '==', String(userId)
   ).limit(1).get();
-  return result.docs.map(doc => doc.data())[0];
+  return result.docs[0];
 }
+
+async function find_or_create(userId) {
+  const user = await find(userId);
+  if (user) { return user; }
+  const ref = await collection.add({
+    user_id: userId,
+  });
+  const newUser = await ref.get();
+  return newUser;
+}
+
+async function touch(userId) {
+  const ts = new Date();
+  const user = await(find_or_create(userId));
+  collection.doc(user.id).update({
+    bugged_at: ts,
+  });
+}
+
+async function setParticipation(userId, value) {
+  const user = await(find_or_create(userId));
+  collection.doc(user.id).update({
+    participation: value,
+  });
+}
+
+module.exports = {
+  find,
+  find_or_create,
+  setParticipation,
+  touch,
+};
