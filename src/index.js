@@ -5,19 +5,16 @@ const pluralz = require('./pluralz');
 const slackz = require('./slackz');
 const users = require('./users');
 
-// Respond to initial challenge when adding URL to the Slack app.
-// This function is not needed thereafter.
-exports.verify = (req, res) => {
-  const body = req.body;
-  if (body.challenge) {
-    res.status(200).send(body.challenge);
-  }
-}
-
 // Main event function handler
 exports.main = async (req, res) => {
   const body = req.body;
   console.log(body);
+
+  // Allow re-verification of URL by Slack
+  if (body.challenge) {
+    res.status(200).send(body.challenge);
+    return
+  }
 
   // event fields: { client_msg_id, user, ts, text, channel }
   const event = body.event || {};
