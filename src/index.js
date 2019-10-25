@@ -1,4 +1,5 @@
-const BUG_TIME_THRESH = 1 * 60 * 1000;
+const bug_timeout = Number(process.env.BUG_TIMEOUT || 1);
+const BUG_TIMEOUT_MILLIS = bug_timeout * 60 * 1000;
 const test_channel = process.env["TEST_CHANNEL"];
 
 const axios = require('axios');
@@ -39,7 +40,7 @@ function logResponse(response, name="request") {
 }
 
 function timeToBugAgain(buggedAt) {
-  return (new Date() - buggedAt) > BUG_TIME_THRESH;
+  return (new Date() - buggedAt) > BUG_TIMEOUT_MILLIS;
 }
 
 async function handleEvent(event) {
@@ -55,8 +56,8 @@ async function handleEvent(event) {
   } else if (userData.participation === 'autocorrect' && userData.token) {
     console.log(`Pluralz: correct user ${userId}.`)
     correctPluralz({ ts, text, channel, token: userData.token });
-  } else if (!user.participation || timeToBugAgain(userData.bugged_at)) {
-    console.log(`Pluralz: time to bug user ${userId}!`)
+  } else if (!userData.participation || !userData.bugged_at || timeToBugAgain(userData.bugged_at.toDate())) {
+    console.log(`Pluralz: time to bug user ${userId}! Last bug time: ${userData.bugged_at && userData.bugged_at.toDate()}`)
     suggestPluralz({ userId, channel });
   } else {
     console.log(`Pluralz: we're hiding from user ${userId}.`)
