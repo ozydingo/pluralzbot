@@ -2,10 +2,14 @@ const BOT_TOKEN = process.env["BOT_TOKEN"];
 
 const pluralz = require('./pluralz');
 
-const headers = (token) => ({
+const authHeaders = (token) => ({
   "Authorization": `Bearer ${token}`,
-  "Content-type": "application/json; charset=utf-8"
+  "Content-type": "application/json; charset=utf-8",
 });
+
+const noAuthHeaders = {
+  "Content-type": "application/json; charset=utf-8",
+};
 
 function settingsButton({ text, value }) {
   return {
@@ -15,6 +19,18 @@ function settingsButton({ text, value }) {
       type: "plain_text",
       text: text
     },
+  }
+}
+
+function responseForPref(value) {
+  if (value === 'ignore') {
+    return "Ok, I won't bug you again!";
+  } else if (value === 'private') {
+    return "You got it. But I'll leave you alone for the next little while in any case.";
+  } else if (value === 'public') {
+    return "I like your style.";
+  } else if (value === 'autocorrect') {
+    return "I'm on it!";
   }
 }
 
@@ -59,7 +75,7 @@ exports.suggestion = ({ userId, channel }) => {
   return {
     method: 'POST',
     url: 'https://slack.com/api/chat.postEphemeral',
-    headers: headers(BOT_TOKEN),
+    headers: authHeaders(BOT_TOKEN),
     data: data,
   };
 }
@@ -75,7 +91,18 @@ exports.correction = ({ ts, text, channel, token }) => {
   return {
     method: 'POST',
     url: 'https://slack.com/api/chat.update',
-    headers: headers(token),
+    headers: authHeaders(token),
     data: data,
   };
+}
+
+exports.acknowledgePrefs = ({ value, response_url }) => {
+  return {
+    method: 'POST',
+    url: response_url,
+    headers: noAuthHeaders,
+    data: {
+      text: responseForPref(value),
+    }
+  }
 }

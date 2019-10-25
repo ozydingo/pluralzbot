@@ -28,11 +28,19 @@ async function touch(userId) {
   const user = await(find_or_create(userId));
   collection.doc(user.id).update({
     bugged_at: ts,
-  })
+  });
+}
+
+async function setParticipation(userId, value) {
+  const user = await(find_or_create(userId));
+  collection.doc(user.id).update({
+    participation: value,
+  });
 }
 
 module.exports = {
   find,
   find_or_create,
+  setParticipation,
   touch,
 };

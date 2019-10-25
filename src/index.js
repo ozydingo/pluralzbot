@@ -11,31 +11,41 @@ exports.main = async (req, res) => {
   const body = req.body;
   console.log(body);
 
+  const event = body.event || {};
+  const route = eventRoute(event);
+
   // Allow re-verification of URL by Slack
   if (body.challenge) {
     res.status(200).send(body.challenge);
-    return
-  }
-
-  // event fields: { client_msg_id, user, ts, text, channel }
-  const event = body.event || {};
-
-  if (eventInScope(event)) {
+    return;
+  } else if (!eventInScope(event)) {
+    // no-op
+  } else if (route === 'message') {
     await handleMessage(event);
+  } else if (route === 'response') {
+    await handleResponse(event);
   }
 
   res.status(200).send('');
 };
 
+function eventRoute(event) {
+  const { type, subtype, payload } = event;
+  if (type === "message" && !subtype) {
+    return "message";
+  } else if (payload && payload.type === "block actions") {
+    return "response";
+  } else {
+    return null;
+  }
+}
+
 function eventInScope(event) {
-  const { text, channel, type, subtype } = event;
+  return event.channel === test_channel;
+}
 
-  if (channel !== test_channel) { return false; }
-  if (type !== "message" ) { return false; }
-  if (subtype === "message_changed" ) { return false; }
-  if (!text) { return false; }
-
-  return true
+function logResponse(response, name="request") {
+  console.log(`Response for ${name}:`, response.data);
 }
 
 function timeToBugAgain(buggedAt) {
@@ -63,15 +73,28 @@ async function handleMessage(event) {
   }
 }
 
+async function handleResponse(event) {
+  const payload = event.payload || {};
+  const { user, response_url, actions } = payload;
+  const action = actions[0] || {};
+  const value = action.value;
+  if (!user || !user.id) { return; }
+
+  users.setParticipation(user.id, value);
+  axios(slackz.acknowledgePrefs({ value, response_url })).then(response => {
+    logResponse(response, "user interaction");
+  })
+}
+
 function suggestPluralz({ userId, channel }) {
   axios(slackz.suggestion({ userId, channel })).then(response => {
     users.touch(userId);
-    console.log("Response for suggestion:", response.data);
+    logResponse(response, "suggestion");
   });
 }
 
 function correctPluralz({ ts, text, channel, token }) {
   axios(slackz.correction({ ts, text, channel, token })).then(response => {
-    console.log("Response for correction:", response.data);
+    logResponse(response, "correction");
   });
 }
