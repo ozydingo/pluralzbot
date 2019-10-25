@@ -48,3 +48,42 @@ This is what a message post event looks like to the function:
   event_time: 1234567890,
   authed_users: [ 'UABC123' ] }"
 ```
+
+Block action payload:
+
+```
+{
+	"type": "block_actions",
+	"team": {
+		"id": "T0CAG",
+		"domain": "acme-creamery"
+	},
+	"user": {
+		"id": "U0CA5",
+		"username": "Amy McGee",
+		"name": "Amy McGee",
+		"team_id": "T3MDE"
+	},
+	"api_app_id": "A0CA5",
+	"token": "Shh_its_a_seekrit",
+	"container": {
+		"type": "message",
+		"text": "The contents of the original message where the action originated"
+	},
+	"trigger_id": "12466734323.1395872398",
+	"response_url": "https://www.postresponsestome.com/T123567/1509734234",
+	"actions": [
+		{
+			"type": "button",
+			"block_id": "XG9=a",
+			"action_id": "123",
+			"text": {
+				"type": "plain_text",
+				"text": "Button",
+				"emoji": true
+			},
+			"value": "click_me_123",
+			"action_ts": "1572000048.172717"
+		}
+	]
+}```

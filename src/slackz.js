@@ -7,6 +7,17 @@ const headers = (token) => ({
   "Content-type": "application/json; charset=utf-8"
 });
 
+function settingsButton({ text, value }) {
+  return {
+    type: "button",
+    value: value,
+    text: {
+      type: "plain_text",
+      text: text
+    },
+  }
+}
+
 exports.suggestion = ({ userId, channel }) => {
   const blocks = [
     {
@@ -14,6 +25,27 @@ exports.suggestion = ({ userId, channel }) => {
       text: {
         type: "mrkdwn",
         text: pluralz.suggestion,
+      }
+    },
+    {
+      type: "actions",
+      elements: [
+        settingsButton({text: "Correct me", value: "autocorrect"}),
+        settingsButton({text: "Remind me", value: "private"}),
+        settingsButton({text: "Shame me", value: "public"}),
+        settingsButton({text: "Shut up", value: "ignore"}),
+      ]
+    },
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: [
+          "*Correct me*: Automatically correct my mistakez for me.",
+          "*Remind me*: I got this, but remind me in a little while if I do it again.",
+          "*Shame me*: Announce to the channel that I've made a terrible mistake.",
+          "*Shut up*: Please stop bugging me.",
+        ].join("\n")
       }
     }
   ]
