@@ -25,12 +25,10 @@ function settingsButton({ text, value }) {
 function responseForPref(value) {
   if (value === 'ignore') {
     return "Ok, I won't bug you again!";
-  } else if (value === 'private') {
-    return "You got it. But I'll leave you alone for the next little while in any case.";
-  } else if (value === 'public') {
-    return "I like your style.";
+  } else if (value === 'remind') {
+    return "Sure, I'll remind you in a little while if you do it again!";
   } else if (value === 'autocorrect') {
-    return "I'm on it!";
+    return "~I'm on it!~ Actually, I can't do that yet, because I need some oauth work. I'm working on it!";
   }
 }
 
@@ -40,30 +38,29 @@ exports.suggestion = ({ userId, channel }) => {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: 'Hi therez! It lookz like you may have made some spelling errorz. Would you like to correct your mistakez by using "z" for pluralz?',
+        text: 'It lookz like you may have made some spelling errorz. Would you like to correct your mistakez?',
       }
     },
     {
       type: "actions",
       elements: [
         settingsButton({text: "Correct me", value: "autocorrect"}),
-        settingsButton({text: "Remind me", value: "private"}),
-        settingsButton({text: "Shame me", value: "public"}),
+        settingsButton({text: "Remind me later", value: "remind"}),
         settingsButton({text: "Please stop", value: "ignore"}),
       ]
     },
-    {
-      type: "section",
-      text: {
-        type: "mrkdwn",
-        text: [
-          "*Correct me*: Automatically correct my mistakez for me.",
-          "*Remind me*: I got this, but remind me in a little while if I do it again.",
-          "*Shame me*: Announce to the channel that I've made a terrible mistake.",
-          "*Please stop*: Please stop bugging me.",
-        ].join("\n")
-      }
-    }
+    // {
+    //   type: "section",
+    //   text: {
+    //     type: "mrkdwn",
+    //     text: [
+    //       "*Correct me*: Automatically correct my mistakez for me.",
+    //       "*Remind me*: I got this, but remind me in a little while if I do it again.",
+    //       "*Shame me*: Announce to the channel that I've made a terrible mistake.",
+    //       "*Please stop*: Please stop bugging me.",
+    //     ].join("\n")
+    //   }
+    // }
   ]
 
   const data = {
