@@ -20,6 +20,8 @@ exports.main = async (req, res) => {
     await handleEvent(body.event);
   } else if (query.action === 'response' && body.payload) {
     await handleResponse(body.payload);
+  } else if (query.action === 'command') {
+    await handleCommand(body);
   }
 
   res.status(200).send('');
@@ -48,16 +50,16 @@ async function handleEvent(event) {
   const user = await users.find_or_create(userId);
   const userData = user.data();
   if (userData.participation === 'ignore') {
-    console.log(`Action: ignore user ${userId}.`)
+    console.log(`Pluralz: ignore user ${userId}.`)
     return;
   } else if (userData.participation === 'autocorrect' && userData.token) {
-    console.log(`Action: correct user ${userId}.`)
+    console.log(`Pluralz: correct user ${userId}.`)
     correctPluralz({ ts, text, channel, token: userData.token });
   } else if (!user.participation || timeToBugAgain(userData.bugged_at)) {
-    console.log(`Action: time to bug user ${userId}!`)
+    console.log(`Pluralz: time to bug user ${userId}!`)
     suggestPluralz({ userId, channel });
   } else {
-    console.log(`Action: we're hiding from user ${userId}.`)
+    console.log(`Pluralz: we're hiding from user ${userId}.`)
     return;
   }
 }
@@ -77,6 +79,13 @@ async function handleResponse(payloadStr) {
   axios(slackz.acknowledgePrefs({ value, response_url })).then(response => {
     logResponse(response, "user interaction");
   })
+}
+
+async function handleCommand({ user_id: userId, channel_id: channel }) {
+  axios(slackz.settingsInquiry({ userId, channel })).then(response => {
+    users.touch(userId);
+    logResponse(response, "suggestion");
+  });
 }
 
 function suggestPluralz({ userId, channel }) {
