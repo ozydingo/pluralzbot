@@ -8,40 +8,28 @@ const users = require('./users');
 
 // Main event function handler
 exports.main = async (req, res) => {
-  const body = req.body;
+  const { body, query } = req;
   console.log(body);
-
-  const event = body.event || {};
-  const route = eventRoute(event);
+  console.log(query);
 
   // Allow re-verification of URL by Slack
   if (body.challenge) {
     res.status(200).send(body.challenge);
     return;
-  } else if (!eventInScope(event)) {
-    // no-op
-  } else if (route === 'message') {
-    await handleMessage(event);
-  } else if (route === 'response') {
-    await handleResponse(event);
+  } else if (query.action === 'event' && body.event) {
+    await handleEvent(body.event);
+  } else if (query.action === 'response' && body.payload) {
+    await handleResponse(body.payload);
   }
 
   res.status(200).send('');
 };
 
-function eventRoute(event) {
-  const { type, subtype, payload } = event;
-  if (type === "message" && !subtype) {
-    return "message";
-  } else if (payload && payload.type === "block actions") {
-    return "response";
-  } else {
-    return null;
-  }
-}
-
 function eventInScope(event) {
-  return event.channel === test_channel;
+  return (
+    event.channel === test_channel &&
+    event.type === "message" && !event.subtype
+  );
 }
 
 function logResponse(response, name="request") {
@@ -52,8 +40,9 @@ function timeToBugAgain(buggedAt) {
   return (new Date() - buggedAt) > BUG_TIME_THRESH;
 }
 
-async function handleMessage(event) {
+async function handleEvent(event) {
   const { ts, text, channel, user: userId } = event;
+  if (!eventInScope(event)) { return; }
   if (!pluralz.hasPlural(text)) { return; }
 
   const user = await users.find_or_create(userId);
@@ -73,12 +62,16 @@ async function handleMessage(event) {
   }
 }
 
-async function handleResponse(event) {
-  const payload = event.payload || {};
+async function handleResponse(payloadStr) {
+  const payload = JSON.parse(payloadStr);
+  if (payload.type !== "block_actions") { return; }
+
   const { user, response_url, actions } = payload;
   const action = actions[0] || {};
   const value = action.value;
   if (!user || !user.id) { return; }
+
+  console.log(`Setting user ${user} to ${value}`);
 
   users.setParticipation(user.id, value);
   axios(slackz.acknowledgePrefs({ value, response_url })).then(response => {
