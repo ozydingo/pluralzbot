@@ -19,6 +19,12 @@ Pluralzbot also has the ability to automatically change your messages for you fo
   * `TEST_CHANNEL`: get the channel id that is being monitored (this will soon be removed). Should look like `GABCD1234` (private channel) or `CABCD1234` (public channel)
 7. Deploy the function and start typing in the slack channel!
 
+## Deploy
+
+You could keep copy + pasting, but doesn't that just make you feel a little dirty and cheap?
+
+Set up your function's source from a Google Source Repository. For example, I have two remotes: origin (github) and google, where the function is sources. To deploy, push to google master, then go into the function in the GCP console, edit, edploy.
+
 ## Notes
 
 This is what a message post event looks like to the function:
