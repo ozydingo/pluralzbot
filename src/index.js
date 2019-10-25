@@ -47,7 +47,7 @@ async function handleMessage(event) {
   const user = await users.find(userId);
   if (user && user.participation === 'ignore') {
     return;
-  } else if (user.token) {
+  } else if (user && user.token) {
     correctPluralz({ ts, text, channel, token: user.token });
   } else {
     suggestPluralz({ userId, channel });
