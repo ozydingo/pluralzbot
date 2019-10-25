@@ -24,7 +24,7 @@ exports.suggestion = ({ userId, channel }) => {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: pluralz.suggestion,
+        text: 'Hi therez! It lookz like you may have made some spelling errorz. Would you like to correct your mistakez by using "z" for pluralz?',
       }
     },
     {
@@ -33,7 +33,7 @@ exports.suggestion = ({ userId, channel }) => {
         settingsButton({text: "Correct me", value: "autocorrect"}),
         settingsButton({text: "Remind me", value: "private"}),
         settingsButton({text: "Shame me", value: "public"}),
-        settingsButton({text: "Shut up", value: "ignore"}),
+        settingsButton({text: "Please stop", value: "ignore"}),
       ]
     },
     {
@@ -44,7 +44,7 @@ exports.suggestion = ({ userId, channel }) => {
           "*Correct me*: Automatically correct my mistakez for me.",
           "*Remind me*: I got this, but remind me in a little while if I do it again.",
           "*Shame me*: Announce to the channel that I've made a terrible mistake.",
-          "*Shut up*: Please stop bugging me.",
+          "*Please stop*: Please stop bugging me.",
         ].join("\n")
       }
     }
