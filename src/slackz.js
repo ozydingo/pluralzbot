@@ -8,8 +8,18 @@ const headers = (token) => ({
 });
 
 exports.suggestion = ({ userId, channel }) => {
+  const blocks = [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: pluralz.suggestion,
+      }
+    }
+  ]
+
   const data = {
-    text: pluralz.suggestion,
+    blocks: blocks,
     channel: channel,
     user: userId,
   };
