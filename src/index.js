@@ -1,14 +1,9 @@
-const BOT_TOKEN = process.env["BOT_TOKEN"];
 const test_channel = process.env["TEST_CHANNEL"];
 
 const axios = require('axios');
 const pluralz = require('./pluralz');
+const slackz = require('./slackz');
 const users = require('./users');
-
-const headers = (token) => ({
-  "Authorization": `Bearer ${token}`,
-  "Content-type": "application/json; charset=utf-8"
-});
 
 // Respond to initial challenge when adding URL to the Slack app.
 // This function is not needed thereafter.
@@ -60,30 +55,13 @@ async function handleMessage(event) {
 }
 
 function suggestPluralz({ userId, channel }) {
-  const data = {
-    text: pluralz.suggestion,
-    channel: channel,
-    user: userId,
-  }
-  axios({
-    method: 'POST',
-    url: 'https://slack.com/api/chat.postEphemeral',
-    headers: headers(BOT_TOKEN),
-    data: data,
-  }).then(response => console.log("Response for suggestion:", response.data));
+  axios(slackz.suggestion({ userId, channel })).then(response => {
+    console.log("Response for suggestion:", response.data);
+  });
 }
 
 function correctPluralz({ ts, text, channel, token }) {
-  const data = {
-    text: pluralz.replace(text),
-    ts: ts,
-    channel: channel,
-    as_user: true,
-  };
-  axios({
-    method: 'POST',
-    url: 'https://slack.com/api/chat.update',
-    headers: headers(token),
-    data: data,
-  }).then(response => console.log("Response for correction:", response.data));
+  axios(slackz.correction({ ts, text, channel, token })).then(response => {
+    console.log("Response for correction:", response.data);
+  });
 }
