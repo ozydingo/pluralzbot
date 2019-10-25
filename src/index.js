@@ -15,16 +15,16 @@ exports.main = async (req, res) => {
   // Allow re-verification of URL by Slack
   if (body.challenge) {
     res.status(200).send(body.challenge);
-    return;
   } else if (query.action === 'event' && body.event) {
     await handleEvent(body.event);
+    res.status(200).send('');
   } else if (query.action === 'response' && body.payload) {
     await handleResponse(body.payload);
+    res.status(200).send('');
   } else if (query.action === 'command') {
+    res.status(200).send('');
     await handleCommand(body);
   }
-
-  res.status(200).send('');
 };
 
 function eventInScope(event) {
@@ -73,7 +73,7 @@ async function handleResponse(payloadStr) {
   const value = action.value;
   if (!user || !user.id) { return; }
 
-  console.log(`Setting user ${user} to ${value}`);
+  console.log(`Setting user ${user.id} to ${value}`);
 
   users.setParticipation(user.id, value);
   axios(slackz.acknowledgePrefs({ value, response_url })).then(response => {
