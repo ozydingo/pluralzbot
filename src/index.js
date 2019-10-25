@@ -1,5 +1,6 @@
 const bug_timeout = Number(process.env.BUG_TIMEOUT || 1);
 const BUG_TIMEOUT_MILLIS = bug_timeout * 60 * 1000;
+const CLIENT_ID = process.env.CLIENT_ID;
 const test_channel = process.env["TEST_CHANNEL"];
 
 const axios = require('axios');
@@ -26,6 +27,8 @@ exports.main = async (req, res) => {
     res.status(200).send('');
     await handleCommand(body);
   }
+
+  res.status(404).send('No action to perform.');
 };
 
 function eventInScope(event) {
