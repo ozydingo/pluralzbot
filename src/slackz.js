@@ -14,23 +14,25 @@ const noAuthHeaders = {
 };
 const oauthUrl = `https://slack.com/oauth/v2/authorize?user_scope=chat:write&client_id=${CLIENT_ID}`;
 
-function settingsButton({ text, value }) {
-  return {
+function settingsButton({ text, value, style }) {
+  const button = {
     type: "button",
     value: value,
     text: {
       type: "plain_text",
-      text: text
+      text: text,
     },
-  }
+  };
+  if (style) { button.style = style; }
+  return button;
 }
 
 const actionBlock = {
   type: "actions",
   elements: [
-    settingsButton({text: "Correct me", value: "autocorrect"}),
+    settingsButton({text: "Correct me", value: "autocorrect", style: "primary"}),
     settingsButton({text: "Remind me later", value: "remind"}),
-    settingsButton({text: "Please stop", value: "ignore"}),
+    settingsButton({text: "Please stop", value: "ignore", style: "danger"}),
   ]
 }
 
@@ -45,7 +47,29 @@ function responseForPref(value) {
     };
   } else if (value === 'autocorrect') {
     return {
-      text: `Sure! You need to authorize me to do that -- [click here](${oauthUrl})`,
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: "Sure! I'm going to need your authorization. (This will open a browser window.)",
+          }
+        },
+        {
+          type: "actions",
+          elements: [
+            {
+              type: "button",
+              style: "primary",
+              text: {
+                type: "plain_text",
+                text: "Grant access",
+              },
+              url: oauthUrl,
+            }
+          ]
+        }
+      ]
     };
   }
 }
@@ -114,13 +138,6 @@ exports.acknowledgePrefs = ({ value, response_url }) => {
     url: response_url,
     headers: noAuthHeaders,
     data: responseForPref(value),
-  }
-}
-
-exports.getOauthCode = () => {
-  return {
-    method: 'GET',
-    url: `https://slack.com/oauth/v2/authorize?user_scope=chat:write&client_id=${CLIENT_ID}`,
   }
 }
 
