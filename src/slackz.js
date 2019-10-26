@@ -1,4 +1,6 @@
 const BOT_TOKEN = process.env["BOT_TOKEN"];
+const CLIENT_ID = process.env.CLIENT_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
 
 const pluralz = require('./pluralz');
 
@@ -10,6 +12,7 @@ const authHeaders = (token) => ({
 const noAuthHeaders = {
   "Content-type": "application/json; charset=utf-8",
 };
+const oauthUrl = `https://slack.com/oauth/v2/authorize?user_scope=chat:write&client_id=${CLIENT_ID}`;
 
 function settingsButton({ text, value }) {
   return {
@@ -33,11 +36,17 @@ const actionBlock = {
 
 function responseForPref(value) {
   if (value === 'ignore') {
-    return "Ok, I won't bug you again! If you change your mind, just type `/pluralz`.";
+    return {
+      text: "Ok, I won't bug you again! If you change your mind, just type `/pluralz`."
+    };
   } else if (value === 'remind') {
-    return "Sure, I'll remind you in a little while if you do it again! You can also type `/pluralz` to get my attention again.";
+    return {
+      text: "Sure, I'll remind you in a little while if you do it again! You can also type `/pluralz` to get my attention again."
+    };
   } else if (value === 'autocorrect') {
-    return "~I'm on it!~ Actually, I can't do that yet, because I need some oauth work. I'm working on it! I'll remind you again in a bit, and you can also type `/pluralz` to get my attention again.";
+    return {
+      text: `Sure! You need to authorize me to do that -- [click here](${oauthUrl})`,
+    };
   }
 }
 
@@ -104,8 +113,21 @@ exports.acknowledgePrefs = ({ value, response_url }) => {
     method: 'POST',
     url: response_url,
     headers: noAuthHeaders,
-    data: {
-      text: responseForPref(value),
-    }
+    data: responseForPref(value),
+  }
+}
+
+exports.getOauthCode = () => {
+  return {
+    method: 'GET',
+    url: `https://slack.com/oauth/v2/authorize?user_scope=chat:write&client_id=${CLIENT_ID}`,
+  }
+}
+
+exports.exchangeOauthCode = (code) => {
+  return {
+    method: 'POST',
+    url: 'https://slack.com/api/oauth.v2.access',
+    data: `code=${code}&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}`
   }
 }

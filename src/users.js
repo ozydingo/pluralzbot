@@ -38,9 +38,17 @@ async function setParticipation(userId, value) {
   });
 }
 
+async function setToken(userId, token) {
+  const user = await(find_or_create(userId));
+  collection.doc(user.id).update({
+    token: token,
+  });
+}
+
 module.exports = {
   find,
   find_or_create,
   setParticipation,
+  setToken,
   touch,
 };

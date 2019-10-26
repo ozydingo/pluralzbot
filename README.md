@@ -17,6 +17,8 @@ Pluralzbot also has the ability to automatically change your messages for you fo
 6. Edit the function, scroll down to environment variables. Add the following variables:
   * `BOT_TOKEN`: copy this from the Slack app.
   * `TEST_CHANNEL`: get the channel id that is being monitored (this will soon be removed). Should look like `GABCD1234` (private channel) or `CABCD1234` (public channel)
+  * `CLIENT_ID`: client id of the app.
+  * `CLIENT_SECRET`: client secret of the app.
 7. Deploy the function and start typing in the slack channel!
 
 ## Deploy
@@ -24,6 +26,17 @@ Pluralzbot also has the ability to automatically change your messages for you fo
 You could keep copy + pasting, but doesn't that just make you feel a little dirty and cheap?
 
 Set up your function's source from a Google Source Repository. For example, I have two remotes: origin (github) and google, where the function is sources. To deploy, push to google master, then go into the function in the GCP console, edit, edploy.
+
+## Oauth
+
+PluralzBot requires the following scopes:
+
+* bot
+* commands
+* channels:history
+* groups:history
+* chat:write:user
+* chat:write:bot
 
 ## Notes
 
@@ -86,4 +99,40 @@ Block action payload:
 			"action_ts": "1572000048.172717"
 		}
 	]
-}```
+}
+```
+
+Oauth redirect query params, which can include any specified in the redirect_uri
+
+```
+{
+  code: a_very_long_string, state: ''
+}
+```
+
+Oauth code exchange response
+
+```
+{
+    "ok": true,
+    "access_token": "xoxb-17653672481-19874698323-pdFZKVeTuE8sk7oOcBrzbqgy",
+    "token_type": "bot",
+    "scope": "commands,incoming-webhook",
+    "bot_user_id": "U0KRQLJ9H",
+    "app_id": "A0KRD7HC3",
+    "team": {
+        "name": "Slack Softball Team",
+        "id": "T9TK3CUKW"
+    },
+    "enterprise": {
+        "name": "slack-sports",
+        "id": "E12345678"
+    },
+    "authed_user": {
+        "id": "U1234",
+        "scope": "chat:write",
+        "access_token": "xoxp-1234",
+        "token_type": "user"
+    }
+}
+```

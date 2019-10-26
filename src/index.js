@@ -1,6 +1,5 @@
 const bug_timeout = Number(process.env.BUG_TIMEOUT || 1);
 const BUG_TIMEOUT_MILLIS = bug_timeout * 60 * 1000;
-const CLIENT_ID = process.env.CLIENT_ID;
 const test_channel = process.env["TEST_CHANNEL"];
 
 const axios = require('axios');
@@ -11,8 +10,8 @@ const users = require('./users');
 // Main event function handler
 exports.main = async (req, res) => {
   const { body, query } = req;
-  console.log(body);
-  console.log(query);
+  console.log("Body", body);
+  console.log("Query", query);
 
   // Allow re-verification of URL by Slack
   if (body.challenge) {
@@ -26,9 +25,12 @@ exports.main = async (req, res) => {
   } else if (query.action === 'command') {
     res.status(200).send('');
     await handleCommand(body);
+  } else if (query.action === 'oauth') {
+    const { ok, message } = await handleOauth(query);
+    res.status(ok ? 200 : 500).send(message);
+  } else {
+    res.status(404).send('No action to perform.');
   }
-
-  res.status(404).send('No action to perform.');
 };
 
 function eventInScope(event) {
@@ -90,6 +92,24 @@ async function handleCommand({ user_id: userId, channel_id: channel }) {
     users.touch(userId);
     logResponse(response, "suggestion");
   });
+}
+
+async function handleOauth({ code }) {
+  const { data } = await axios(slackz.exchangeOauthCode(code));
+  console.log("Oauth response: ", data);
+
+  const { ok, authed_user: user = {} } = data;
+  const { id: userId, scope, access_token: token, token_type } = user;
+  if (!ok) {
+    return {ok: false, message: data.error || 'Something went wrong.'};
+  } else if (!/chat:write:user/.test(scope)) {
+    return {ok: false, message: 'You must grant acess to post messagez for this to work!'};
+  } else if (token_type !== 'user') {
+    return {ok: false, message: 'Incorrect token type'};
+  } else {
+    await users.setToken(userId, token);
+    return {ok: true, message: "Good to go!"};
+  }
 }
 
 function suggestPluralz({ userId, channel }) {
