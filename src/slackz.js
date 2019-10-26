@@ -12,7 +12,12 @@ const authHeaders = (token) => ({
 const noAuthHeaders = {
   "Content-type": "application/json; charset=utf-8",
 };
-const oauthUrl = `https://slack.com/oauth/v2/authorize?user_scope=chat:write&client_id=${CLIENT_ID}`;
+const oauthUrl = (response_url) => {
+  const state = { response_url };
+  const stateStr = encodeURIComponent(JSON.stringify(state));
+  const paramstr = `user_scope=chat:write&client_id=${CLIENT_ID}&state=${stateStr}`
+  return `https://slack.com/oauth/v2/authorize?${paramstr}`;
+}
 
 function settingsButton({ text, value, style }) {
   const button = {
@@ -37,7 +42,7 @@ const actionBlock = {
   ]
 }
 
-function responseForPref(value) {
+function responseForPref({ value, response_url }) {
   if (value === 'ignore') {
     return {
       text: "Ok, I won't bug you again! If you change your mind, just type `/pluralz`."
@@ -67,7 +72,7 @@ function responseForPref(value) {
                 type: "plain_text",
                 text: "Grant access",
               },
-              url: oauthUrl,
+              url: oauthUrl(response_url),
             }
           ]
         }
@@ -139,7 +144,7 @@ exports.acknowledgePrefs = ({ value, response_url }) => {
     method: 'POST',
     url: response_url,
     headers: noAuthHeaders,
-    data: responseForPref(value),
+    data: responseForPref({ value, response_url }),
   }
 }
 
