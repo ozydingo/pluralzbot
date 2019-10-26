@@ -54,22 +54,13 @@ function timeToBugAgain(buggedAt) {
 
 async function handleEvent(event) {
   console.log("Handling event", event);
-  const { ts, text, channel, user: userId } = event;
+  const { text } = event;
   if (!eventInScope(event)) { return; }
-  if (!pluralz.hasPlural(text)) { return; }
 
-  const user = await users.find_or_create(userId);
-  const userData = user.data();
-  if (userData.participation === 'ignore') {
-    console.log(`Pluralz: ignore user ${userId}.`)
-  } else if (userData.participation === 'autocorrect' && userData.token) {
-    console.log(`Pluralz: correct user ${userId}.`)
-    await correctPluralz({ ts, text, channel, token: userData.token });
-  } else if (!userData.participation || !userData.bugged_at || timeToBugAgain(userData.bugged_at.toDate())) {
-    console.log(`Pluralz: time to bug user ${userId}! Last bug time: ${userData.bugged_at && userData.bugged_at.toDate()}`)
-    await suggestPluralz({ userId, channel });
-  } else {
-    console.log(`Pluralz: we're hiding from user ${userId}.`)
+  if (pluralz.hazPluralz(text)) {
+    await handlePluralz(event);
+  } else if (pluralz.hasPlural(text)) {
+    await handlePlurals(event);
   }
 }
 
@@ -117,6 +108,30 @@ async function handleOauth({ code, state }) {
   }
   await axios(slackz.acknowledgeOauth({message: result.message, response_url}));
   return result;
+}
+
+async function handlePlurals(event) {
+  const { ts, text, channel, user: userId } = event;
+  const user = await users.find_or_create(userId);
+  const userData = user.data();
+  if (userData.participation === 'ignore') {
+    console.log(`Pluralz: ignore user ${userId}.`)
+  } else if (userData.participation === 'autocorrect' && userData.token) {
+    console.log(`Pluralz: correct user ${userId}.`)
+    return correctPluralz({ ts, text, channel, token: userData.token });
+  } else if (!userData.participation || !userData.bugged_at || timeToBugAgain(userData.bugged_at.toDate())) {
+    console.log(`Pluralz: time to bug user ${userId}! Last bug time: ${userData.bugged_at && userData.bugged_at.toDate()}`)
+    return suggestPluralz({ userId, channel });
+  } else {
+    console.log(`Pluralz: we're hiding from user ${userId}.`)
+  }
+}
+
+function handlePluralz(event) {
+  const { ts, channel } = event;
+  return axios(slackz.reactToPluralz( { ts, channel })).then(response => {
+    logResponse(response, "reaction");
+  });
 }
 
 function suggestPluralz({ userId, channel }) {

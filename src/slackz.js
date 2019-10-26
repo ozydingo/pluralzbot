@@ -148,6 +148,19 @@ exports.acknowledgePrefs = ({ value, response_url }) => {
   }
 }
 
+exports.reactToPluralz = ({ ts, channel }) => {
+  return {
+    method: 'POST',
+    url: 'https://slack.com/api/reactions.add',
+    headers: authHeaders(BOT_TOKEN),
+    data: {
+      channel: channel,
+      timestamp: ts,
+      name: '3play',
+    }
+  }
+}
+
 exports.exchangeOauthCode = (code) => {
   return {
     method: 'POST',

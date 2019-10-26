@@ -23,3 +23,7 @@ exports.hasPlural = (text) => {
     !/[aeious]/.test(match[match.length-1])
   ))
 }
+
+exports.hazPluralz = (text) => {
+  return /\b(\w{2,})z([.?!]*)/.test(text);
+}
