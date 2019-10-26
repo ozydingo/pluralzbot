@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <script>
+            function getOuttaHere() {
+                if (window.opener) {
+                  window.close();
+                } else {
+                  window.location = "https://app.slack.com";
+                }
+            }
+            document.addEventListener("DOMContentLoaded", function(event) {
+                setTimeout(getOuttaHere, 3000);
+            });
+        </script>
+    </head>
+    <body>
+        <p>Good to go!</p>
+    </body>
+</html>

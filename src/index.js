@@ -26,8 +26,12 @@ exports.main = async (req, res) => {
     res.status(200).send('');
     await handleCommand(body);
   } else if (query.action === 'oauth') {
-    const { ok, message } = await handleOauth(query);
-    res.status(ok ? 200 : 500).send(message);
+    const { ok } = await handleOauth(query);
+    if (ok) {
+      res.sendFile(__dirname + '/pages/oauth_success.html');
+    } else {
+      res.sendFile(__dirname + '/pages/oauth_failure.html');
+    }
   } else {
     res.status(404).send('No action to perform.');
   }
