@@ -78,15 +78,9 @@ async function handleResponse(payloadStr) {
   const action = actions[0] || {};
   const value = action.value;
   if (!user || !user.id) { return; }
-
-  console.log(`Setting user ${user.id} to ${value}`);
-
-  await Promise.all([
-    users.setParticipation(user.id, value),
-    axios(slackz.acknowledgePrefs({ value, response_url })).then(response => {
-      logResponse(response, "user interaction");
-    }),
-  ]);
+  if (action.block_id === 'set-prefs') {
+    await setPrefs({ user, value, response_url });
+  }
 }
 
 async function handleCommand({ user_id: userId, channel_id: channel }) {
@@ -117,14 +111,24 @@ async function handleOauth({ code }) {
 }
 
 function suggestPluralz({ userId, channel }) {
-  axios(slackz.suggestion({ userId, channel })).then(response => {
+  return axios(slackz.suggestion({ userId, channel })).then(response => {
     users.touch(userId);
     logResponse(response, "suggestion");
   });
 }
 
 function correctPluralz({ ts, text, channel, token }) {
-  axios(slackz.correction({ ts, text, channel, token })).then(response => {
+  return axios(slackz.correction({ ts, text, channel, token })).then(response => {
     logResponse(response, "correction");
   });
+}
+
+function setPrefs({ user, value, response_url }) {
+  console.log(`Setting user ${user.id} to ${value}`);
+  return Promise.all([
+    users.setParticipation(user.id, value),
+    axios(slackz.acknowledgePrefs({ value, response_url })).then(response => {
+      logResponse(response, "user interaction");
+    }),
+  ]);
 }

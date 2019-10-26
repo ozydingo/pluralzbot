@@ -29,6 +29,7 @@ function settingsButton({ text, value, style }) {
 
 const actionBlock = {
   type: "actions",
+  block_id: "set-prefs",
   elements: [
     settingsButton({text: "Correct me", value: "autocorrect", style: "primary"}),
     settingsButton({text: "Remind me later", value: "remind"}),
@@ -57,6 +58,7 @@ function responseForPref(value) {
         },
         {
           type: "actions",
+          block_id: "oauth-access",
           elements: [
             {
               type: "button",
