@@ -91,23 +91,28 @@ async function handleCommand({ user_id: userId, channel_id: channel }) {
   });
 }
 
-async function handleOauth({ code }) {
+async function handleOauth({ code, state }) {
   console.log("Handling oauth", code ? "<CODE>" : undefined);
   const { data } = await axios(slackz.exchangeOauthCode(code));
   console.log("Oauth response: ", data);
 
+  const { response_url } = JSON.parse(state);
+
   const { ok, authed_user: user = {} } = data;
   const { id: userId, scope, access_token: token, token_type } = user;
+  let result;
   if (!ok) {
-    return {ok: false, message: data.error || 'Something went wrong.'};
+    result = {ok: false, message: data.error || 'Something went wrong.'};
   } else if (!/chat:write:user/.test(scope)) {
-    return {ok: false, message: 'You must grant acess to post messagez for this to work!'};
+    result = {ok: false, message: 'You must grant acess to post messagez for this to work!'};
   } else if (token_type !== 'user') {
-    return {ok: false, message: 'Incorrect token type'};
+    result = {ok: false, message: 'Incorrect token type'};
   } else {
     await users.setToken(userId, token);
-    return {ok: true, message: "Good to go!"};
+    result = {ok: true, message: "Good to go!"};
   }
+  await axios(slackz.acknowledgeOauth({message: result.message, response_url}));
+  return result;
 }
 
 function suggestPluralz({ userId, channel }) {

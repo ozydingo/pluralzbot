@@ -155,3 +155,11 @@ exports.exchangeOauthCode = (code) => {
     data: `code=${code}&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}`
   }
 }
+
+exports.acknowledgeOauth = ({ message, response_url }) => {
+  return {
+    method: 'POST',
+    url: response_url,
+    data: {text: message},
+  }
+}
