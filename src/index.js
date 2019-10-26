@@ -49,6 +49,7 @@ function timeToBugAgain(buggedAt) {
 }
 
 async function handleEvent(event) {
+  console.log("Handling event", event);
   const { ts, text, channel, user: userId } = event;
   if (!eventInScope(event)) { return; }
   if (!pluralz.hasPlural(text)) { return; }
@@ -57,20 +58,19 @@ async function handleEvent(event) {
   const userData = user.data();
   if (userData.participation === 'ignore') {
     console.log(`Pluralz: ignore user ${userId}.`)
-    return;
   } else if (userData.participation === 'autocorrect' && userData.token) {
     console.log(`Pluralz: correct user ${userId}.`)
-    correctPluralz({ ts, text, channel, token: userData.token });
+    await correctPluralz({ ts, text, channel, token: userData.token });
   } else if (!userData.participation || !userData.bugged_at || timeToBugAgain(userData.bugged_at.toDate())) {
     console.log(`Pluralz: time to bug user ${userId}! Last bug time: ${userData.bugged_at && userData.bugged_at.toDate()}`)
-    suggestPluralz({ userId, channel });
+    await suggestPluralz({ userId, channel });
   } else {
     console.log(`Pluralz: we're hiding from user ${userId}.`)
-    return;
   }
 }
 
 async function handleResponse(payloadStr) {
+  console.log("Handling response", payloadStr);
   const payload = JSON.parse(payloadStr);
   if (payload.type !== "block_actions") { return; }
 
@@ -81,20 +81,24 @@ async function handleResponse(payloadStr) {
 
   console.log(`Setting user ${user.id} to ${value}`);
 
-  users.setParticipation(user.id, value);
-  axios(slackz.acknowledgePrefs({ value, response_url })).then(response => {
-    logResponse(response, "user interaction");
-  })
+  await Promise.all([
+    users.setParticipation(user.id, value),
+    axios(slackz.acknowledgePrefs({ value, response_url })).then(response => {
+      logResponse(response, "user interaction");
+    }),
+  ]);
 }
 
 async function handleCommand({ user_id: userId, channel_id: channel }) {
-  axios(slackz.settingsInquiry({ userId, channel })).then(response => {
+  console.log("Handling command", { userId, channel });
+  await axios(slackz.settingsInquiry({ userId, channel })).then(response => {
     users.touch(userId);
     logResponse(response, "suggestion");
   });
 }
 
 async function handleOauth({ code }) {
+  console.log("Handling oauth", code ? "<CODE>" : undefined);
   const { data } = await axios(slackz.exchangeOauthCode(code));
   console.log("Oauth response: ", data);
 
