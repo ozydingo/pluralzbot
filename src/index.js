@@ -106,14 +106,14 @@ async function handleOauth({ code, state }) {
   const { id: userId, scope, access_token: token, token_type } = user;
   let result;
   if (!ok) {
-    result = {ok: false, message: data.error || 'Something went wrong.'};
+    result = {ok: false, message: `Something went wrong (${data.error || "unkown error"})`};
   } else if (!/chat:write:user/.test(scope)) {
-    result = {ok: false, message: 'You must grant acess to post messagez for this to work!'};
+    result = {ok: false, message: 'Sorry, you must grant me acess to post messagez for this to work!'};
   } else if (token_type !== 'user') {
-    result = {ok: false, message: 'Incorrect token type'};
+    result = {ok: false, message: 'Hm, I got an incorrect token type. Try again.'};
   } else {
     await users.setToken(userId, token);
-    result = {ok: true, message: "Good to go!"};
+    result = {ok: true, message: "Good to go! From now on, I'll automatically correct your errorz. Type `/pluralz` if you change your mind."};
   }
   await axios(slackz.acknowledgeOauth({message: result.message, response_url}));
   return result;

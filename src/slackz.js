@@ -58,7 +58,7 @@ function responseForPref({ value, response_url }) {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: "Sure! I'm going to need your authorization. (This will open a browser window.)",
+            text: "Sure! To get started, you'll need to authorize me to edit your messages.",
           }
         },
         {
