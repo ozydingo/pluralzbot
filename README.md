@@ -1,5 +1,5 @@
 # PluralzBot
-Obnoxiously ask to change your slack messages for you
+A Slack app to obnoxiously ask to change your messages for you. Slack + Google Cloud Functions + Google Firestore.
 
 ## What is doez
 
