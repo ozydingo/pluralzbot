@@ -1,42 +1,53 @@
-# pluralzbot
+# PluralzBot
 Obnoxiously ask to change your slack messages for you
 
 ## What is doez
 
-Pluralzbot will watch your messages in installed channels for any messages that end in a plural word spelled with an 's'. It will then ~obnoxiously~ kindly suggest you change this spelling to end in a 'z'.
+PluralzBot will watch your messages in installed channels for any messages that end in a plural word spelled with an 's'. It will then ~obnoxiously~ kindly suggest you change this spelling to end in a 'z'. If you authorize it, it will automatically correct these errorz for you.
 
-Pluralzbot also has the ability to automatically change your messages for you for super convenience. However, this feature is on hold until multi-user token storage is worked out.
+You can tell PluralzBot to stop bugging you at any time. Either use the buttons presented in its gentle inquiry or summon in using `/pluralz`
 
-## How it doez
+## Code Setup
 
-1. Create a Google Cloud function using the Node.js 8 runtime.
-2. Copy the files in `src` into this function.
-3. Set the "Function To Execute" to `verify`.
-4. Paste the Google Cloud function http trigger into the Slack app. Verification should succeed.
-5. Modify the "Function To Execute" to `main`.
-6. Edit the function, scroll down to environment variables. Add the following variables:
-  * `BOT_TOKEN`: copy this from the Slack app.
-  * `TEST_CHANNEL`: get the channel id that is being monitored (this will soon be removed). Should look like `GABCD1234` (private channel) or `CABCD1234` (public channel)
-  * `CLIENT_ID`: client id of the app.
-  * `CLIENT_SECRET`: client secret of the app.
-7. Deploy the function and start typing in the slack channel!
+* Type `npm install` from `/src` to install the needed dependencies locally.
+* Run `npm run lint` to lint your code.
+* Run `npm run test` to run the test suite.
+  * Beware, it only covers some basic isolated logic. The benefit of testing the specific Slack inbound and outbound messages is questionable, and of testing Firestore interactions was more than I cared to take on.
 
-## Deploy
+## App Setup
 
-You could keep copy + pasting, but doesn't that just make you feel a little dirty and cheap?
+PluralzBot is hosted on Google Cloud Platform using a Node.js 8 runtime cloud function and a Firestore database to hold user preferences. It is deployed via a Google Source Repository ([here](https://source.cloud.google.com/playground-252414/pluralzbot)). More details as follows:
 
-Set up your function's source from a Google Source Repository. For example, I have two remotes: origin (github) and google, where the function is sources. To deploy, push to google master, then go into the function in the GCP console, edit, edploy.
+* Set the function's source repository and branch (master unless you have a better idea).
+* Set the directory with source code to `/src`.
+* Set "Function to execute" to `main`.
+  * This function will automatically detect if Slack is sending a verification challenge and respond accordingly, so you don't have to worry about that.
+* Set up the following environment variables
+  * `BOT_TOKEN`: the oauth token labeled "bot" in your Slack app. This is needed to perform most of PuralzBot's primary actions.
+  * `CHANNEL_WHITELIST`: a comma-separated list of channel ids that PluralzBot will respond to. This is for safety -- this is an obnoxious app.
+  * `CLIENT_ID`: from your Slack app's basic info. This is needed when a user is authorizing the application to autocorrect their messages.
+  * `CLIENT_SECRET`: from your Slack app's basic info. This is needed when a user is authorizing the application to autocorrect their messages.
+  * `BUG_TIMEOUT`: minimum time, in minutes, between responses that PluralzBot will send to a given user when they are not set to ignore or autocorrect. Let's not be *too* obnoxious.
+  * `VERIFICATION_TOKEN`: from your Slack app's info. This verifies that requests are coming from Slack. (TODO: implement signature verification.)
 
-## Oauth
+## Slack Setup
 
-PluralzBot requires the following scopes:
-
-* bot
-* commands
-* channels:history
-* groups:history
-* chat:write:user
-* chat:write:bot
+* Set up the Slack app to subscribe to the following events:
+  * `message.channels`
+  * `message.groups`
+* Set the event subscription URL to be the function's trigger with `?action=event` appended.
+* Give the Slack app the following scopes:
+  * bot
+  * commands
+  * channels:history
+  * groups:history
+  * chat:write:user
+  * chat:write:bot
+* Set up the oauth redirect URL to the same function's trigger address with `?action=oauth` appended.
+* Set up a slack command `/pluralz` with a request URL of the function's trigger with `?action=command` appended.
+* Enabled Interactive Components with a request URL of the function's trigger with `?action=response` appended.
+* Add a bot user.
+* Set your app's logo to the image file contained in `assets/logo.png`.
 
 ## Notes
 
