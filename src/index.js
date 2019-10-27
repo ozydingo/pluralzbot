@@ -1,6 +1,6 @@
 const bug_timeout = Number(process.env.BUG_TIMEOUT || 1);
 const BUG_TIMEOUT_MILLIS = bug_timeout * 60 * 1000;
-const test_channel = process.env.TEST_CHANNEL;
+const channel_whitelist = (process.env.CHANNEL_WHITELIST || []).split(/\s*,\s*/);
 const VERIFICATION_TOKEN = process.env.VERIFICATION_TOKEN;
 
 const axios = require('axios');
@@ -10,6 +10,8 @@ const users = require('./users');
 
 // Main event function handler
 exports.main = async (req, res) => {
+  if (process.env.SHUTOFF) { console.log("SHUTOFF"); return; }
+
   const { body, query } = req;
   console.log("Body", body);
   console.log("Query", query);
@@ -45,7 +47,7 @@ exports.main = async (req, res) => {
 
 function eventInScope(event) {
   return (
-    event.channel === test_channel &&
+    channel_whitelist.includes(event.channel) &&
     event.type === "message" && !event.subtype
   );
 }
