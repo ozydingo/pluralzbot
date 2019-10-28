@@ -10,7 +10,11 @@ const users = require('./users');
 
 // Main event function handler
 exports.main = async (req, res) => {
-  if (process.env.SHUTOFF) { console.log("SHUTOFF"); return; }
+  if (process.env.SHUTOFF) {
+    console.log("SHUTOFF");
+    res.status(200).send('');
+    return;
+  }
 
   const { body, query } = req;
   console.log("Body", body);
