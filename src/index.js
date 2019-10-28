@@ -88,6 +88,8 @@ async function handleResponse(payloadStr) {
   if (!user || !user.id) { return; }
   if (action.block_id === 'set-prefs') {
     await setPrefs({ user, value, response_url });
+  } else if (user.name) {
+    await setUsername(user);
   }
 }
 
@@ -163,9 +165,13 @@ function correctPluralz({ ts, text, channel, token }) {
 function setPrefs({ user, value, response_url }) {
   console.log(`Setting user ${user.id} to ${value}`);
   return Promise.all([
-    users.setParticipation(user.id, value),
+    users.setParticipation(user.id, value, {name: user.name}),
     axios(slackz.acknowledgePrefs({ value, response_url })).then(response => {
       logResponse(response, "user interaction");
     }),
   ]);
+}
+
+function setUsername({ id, name }) {
+  return users.setName(id, name);
 }

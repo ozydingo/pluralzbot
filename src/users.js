@@ -31,11 +31,18 @@ async function touch(userId) {
   });
 }
 
-async function setParticipation(userId, value) {
+async function setName(userId, name) {
   const user = await(find_or_create(userId));
   collection.doc(user.id).update({
-    participation: value,
-  });
+    name: name
+  })
+}
+
+async function setParticipation(userId, value, { name }) {
+  const user = await(find_or_create(userId));
+  const attrs = {participation: value};
+  if (name) { attrs.name = name; }
+  collection.doc(user.id).update(attrs);
 }
 
 async function setToken(userId, token) {
@@ -48,6 +55,7 @@ async function setToken(userId, token) {
 module.exports = {
   find,
   find_or_create,
+  setName,
   setParticipation,
   setToken,
   touch,
