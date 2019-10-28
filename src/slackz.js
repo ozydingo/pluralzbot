@@ -12,8 +12,8 @@ const authHeaders = (token) => ({
 const noAuthHeaders = {
   "Content-type": "application/json; charset=utf-8",
 };
-const oauthUrl = (response_url) => {
-  const state = { response_url };
+const oauthUrl = ({ response_url, channel, user_id }) => {
+  const state = { response_url, channel, user_id };
   const stateStr = encodeURIComponent(JSON.stringify(state));
   const paramstr = `user_scope=chat:write&client_id=${CLIENT_ID}&state=${stateStr}`
   return `https://slack.com/oauth/v2/authorize?${paramstr}`;
@@ -42,6 +42,42 @@ const actionBlock = {
   ]
 }
 
+const oauthBlocks = ({ state, message }) => (
+  [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: message,
+      }
+    },
+    {
+      type: "actions",
+      block_id: "oauth-access",
+      elements: [
+        {
+          type: "button",
+          value: "grant",
+          style: "primary",
+          text: {
+            type: "plain_text",
+            text: "Grant access",
+          },
+          url: oauthUrl(state),
+        },
+        {
+          type: "button",
+          value: "cancel",
+          text: {
+            type: "plain_text",
+            text: "Cancel",
+          },
+        },
+      ]
+    }
+  ]
+)
+
 function responseForPref({ value, response_url }) {
   if (value === 'ignore') {
     return {
@@ -52,32 +88,10 @@ function responseForPref({ value, response_url }) {
       text: "Sure, I'll remind you in a little while if you do it again! You can also type `/pluralz` to get my attention again."
     };
   } else if (value === 'autocorrect') {
-    return {
-      blocks: [
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text: "Sure! To get started, you'll need to authorize me to edit your messages.",
-          }
-        },
-        {
-          type: "actions",
-          block_id: "oauth-access",
-          elements: [
-            {
-              type: "button",
-              style: "primary",
-              text: {
-                type: "plain_text",
-                text: "Grant access",
-              },
-              url: oauthUrl(response_url),
-            }
-          ]
-        }
-      ]
-    };
+    return oauthBlocks({
+      state: { response_url },
+      message: "Sure! To get started, you'll need to authorize me to edit your messagez."
+    });
   }
 }
 
@@ -123,6 +137,25 @@ exports.settingsInquiry = ({ userId, channel }) => {
   });
 }
 
+exports.reauth = ({ userId, channel }) => {
+  const msg = "Uh oh! You've asked me to help out your spellingz, but I don't have a working authorization token! Please grant me access or update your settings.";
+  const data = {
+    blocks: oauthBlocks({
+      state: { channel, user_id: userId },
+      message: msg
+    }),
+    channel: channel,
+    user: userId,
+  };
+
+  return {
+    method: 'POST',
+    url: 'https://slack.com/api/chat.postEphemeral',
+    headers: authHeaders(BOT_TOKEN),
+    data: data,
+  };
+}
+
 exports.correction = ({ ts, text, channel, token }) => {
   const data = {
     text: pluralz.replace(text),
@@ -148,6 +181,24 @@ exports.acknowledgePrefs = ({ value, response_url }) => {
   }
 }
 
+exports.requestOauth = ({ response_url }) => {
+  return {
+    method: 'POST',
+    url: response_url,
+    headers: noAuthHeaders,
+    data: {text: "Ok, let's do this!"},
+  };
+}
+
+exports.cancelOauth = ({ response_url }) => {
+  return {
+    method: 'POST',
+    url: response_url,
+    headers: noAuthHeaders,
+    data: {text: "Sure. I may ask again in a little while."},
+  };
+}
+
 exports.reactToPluralz = ({ ts, channel }) => {
   return {
     method: 'POST',
@@ -169,10 +220,19 @@ exports.exchangeOauthCode = (code) => {
   }
 }
 
-exports.acknowledgeOauth = ({ message, response_url }) => {
-  return {
-    method: 'POST',
-    url: response_url,
-    data: {text: message},
+exports.acknowledgeOauth = ({ message, response_url, channel, user_id }) => {
+  if (response_url) {
+    return {
+      method: 'POST',
+      url: response_url,
+      data: {text: message},
+    }
+  } else if (channel && user_id) {
+    return {
+      method: 'POST',
+      url: 'https://slack.com/api/chat.postEphemeral',
+      headers: authHeaders(BOT_TOKEN),
+      data: {text: message},
+    }
   }
 }

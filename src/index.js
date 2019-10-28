@@ -39,7 +39,7 @@ exports.main = async (req, res) => {
     res.status(200).send('');
     await handleCommand(body);
   } else if (query.action === 'oauth') {
-    const { ok } = await handleOauth(query);
+    const { ok } = await handleOauthRedirect(query);
     if (ok) {
       res.sendFile(__dirname + '/pages/oauth_success.html');
     } else {
@@ -88,6 +88,8 @@ async function handleResponse(payloadStr) {
   if (!user || !user.id) { return; }
   if (action.block_id === 'set-prefs') {
     await setPrefs({ user, value, response_url });
+  } else if (action.block_id === 'oauth-access') {
+    await handleOauthRequest({ user, value, response_url });
   } else if (user.name) {
     await setUsername(user);
   }
@@ -101,12 +103,12 @@ async function handleCommand({ user_id: userId, channel_id: channel }) {
   });
 }
 
-async function handleOauth({ code, state }) {
+async function handleOauthRedirect({ code, state }) {
   console.log("Handling oauth", code ? "<CODE>" : undefined);
   const { data } = await axios(slackz.exchangeOauthCode(code));
   console.log("Oauth response: ", data);
 
-  const { response_url } = JSON.parse(state);
+  const { response_url, channel, user_id } = JSON.parse(state);
 
   const { ok, authed_user: user = {} } = data;
   const { id: userId, scope, access_token: token, token_type } = user;
@@ -121,7 +123,10 @@ async function handleOauth({ code, state }) {
     await users.setToken(userId, token);
     result = {ok: true, message: "Good to go! From now on, I'll automatically correct your errorz. Type `/pluralz` if you change your mind."};
   }
-  await axios(slackz.acknowledgeOauth({message: result.message, response_url}));
+  await axios(slackz.acknowledgeOauth({
+    message: result.message,
+    state: { response_url, channel, user_id }
+  }));
   return result;
 }
 
@@ -134,6 +139,9 @@ async function handlePlurals(event) {
   } else if (userData.participation === 'autocorrect' && userData.token) {
     console.log(`Pluralz: correct user ${userId}.`)
     return correctPluralz({ ts, text, channel, token: userData.token });
+  } else if (userData.participation === 'autocorrect' && !userData.token) {
+    console.log(`Pluralz: requesting token for user ${userId}.`)
+    return reauth({ userId, channel });
   } else if (!userData.participation || !userData.bugged_at || timeToBugAgain(userData.bugged_at.toDate())) {
     console.log(`Pluralz: time to bug user ${userId}! Last bug time: ${userData.bugged_at && userData.bugged_at.toDate()}`)
     return suggestPluralz({ userId, channel });
@@ -156,10 +164,26 @@ function suggestPluralz({ userId, channel }) {
   });
 }
 
+function reauth({ userId, channel }) {
+  return axios(slackz.reauth({ userId, channel })).then(response => {
+    users.touch(userId);
+    logResponse(response, "reauth");
+  });
+}
+
 function correctPluralz({ ts, text, channel, token }) {
   return axios(slackz.correction({ ts, text, channel, token })).then(response => {
     logResponse(response, "correction");
   });
+}
+
+function handleOauthRequest({ user, response_url, value }) {
+  if (value === 'grant') {
+    return axios(slackz.requestOauth({ response_url }));
+  } else if (value === 'cancel') {
+    users.setParticipation(user.id, 'remind', {name: user.name});
+    return axios(slackz.cancelOauth({ response_url }));
+  }
 }
 
 function setPrefs({ user, value, response_url }) {
