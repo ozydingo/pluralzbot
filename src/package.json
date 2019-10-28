@@ -11,7 +11,10 @@
     "jest": "^24.9.0"
   },
   "jest": {
-    "moduleDirectories": ["node_modules", "."]
+    "moduleDirectories": [
+      "node_modules",
+      "."
+    ]
   },
   "scripts": {
     "lint": "./node_modules/.bin/eslint . ;:",
