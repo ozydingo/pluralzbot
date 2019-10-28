@@ -1,7 +1,7 @@
 const bug_timeout = Number(process.env.BUG_TIMEOUT || 1);
 const BUG_TIMEOUT_MILLIS = bug_timeout * 60 * 1000;
 const channel_whitelist = (process.env.CHANNEL_WHITELIST || []).split(/\s*,\s*/);
-const VERIFICATION_TOKEN = process.env.VERIFICATION_TOKEN;
+// const VERIFICATION_TOKEN = process.env.VERIFICATION_TOKEN;
 
 const axios = require('axios');
 const pluralz = require('./pluralz');
@@ -20,10 +20,11 @@ exports.main = async (req, res) => {
   console.log("Body", body);
   console.log("Query", query);
 
-  if (body.token !== VERIFICATION_TOKEN) {
-    res.status(501).send('Unauthorised request.');
-    return;
-  }
+  // TODO: not all POSTS have the token. Figure this out.
+  // if (body.token !== VERIFICATION_TOKEN) {
+  //   res.status(501).send('Unauthorised request.');
+  //   return;
+  // }
 
   // Allow re-verification of URL by Slack
   if (body.challenge) {
