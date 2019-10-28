@@ -38,7 +38,7 @@ const actionBlock = {
   elements: [
     settingsButton({text: "Correct me", value: "autocorrect", style: "primary"}),
     settingsButton({text: "Remind me later", value: "remind"}),
-    settingsButton({text: "Please stop", value: "ignore", style: "danger"}),
+    settingsButton({text: "Stop bugging me", value: "ignore"}),
   ]
 }
 

@@ -43,6 +43,7 @@ exports.main = async (req, res) => {
     if (ok) {
       res.sendFile(__dirname + '/pages/oauth_success.html');
     } else {
+      await users.setParticipation(user.id, '');
       res.sendFile(__dirname + '/pages/oauth_failure.html');
     }
   } else {
