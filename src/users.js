@@ -52,9 +52,14 @@ async function setToken(userId, token, { name } = {}) {
   return collection.doc(user.id).update(attrs);
 }
 
+async function setLastEventId(userDoc, lastEventId) {
+  return collection.doc(userDoc.id).update({lastEventId: lastEventId});
+}
+
 module.exports = {
   find,
   find_or_create,
+  setLastEventId,
   setName,
   setParticipation,
   setToken,

@@ -148,20 +148,32 @@ async function handlePlurals(event) {
   const { ts, text, channel, user: userId } = event;
   const user = await users.find_or_create(userId);
   const userData = user.data();
+  const lastEventId = userData.lastEventId;
+  const requests = [];
+
+  if (event.client_msg_id === lastEventId) {
+    console.log(`Pluralz: ignore dup event ${lastEventId}`);
+    return;
+  } else if (event.client_msg_id) {
+    requests.push(users.setLastEventId(user, event.client_msg_id));
+  }
+
   if (userData.participation === 'ignore') {
     console.log(`Pluralz: ignore user ${userId}.`)
   } else if (userData.participation === 'autocorrect' && userData.token) {
     console.log(`Pluralz: correct user ${userId}.`)
-    return correctPluralz({ ts, text, channel, token: userData.token });
+    requests.push(correctPluralz({ ts, text, channel, token: userData.token }));
   } else if (userData.participation === 'autocorrect' && !userData.token) {
     console.log(`Pluralz: requesting token for user ${userId}.`)
-    return reauth({ userId, channel });
+    requests.push(reauth({ userId, channel }));
   } else if (!userData.participation || !userData.bugged_at || timeToBugAgain(userData.bugged_at.toDate())) {
     console.log(`Pluralz: time to bug user ${userId}! Last bug time: ${userData.bugged_at && userData.bugged_at.toDate()}`)
-    return suggestPluralz({ userId, channel });
+    requests.push(suggestPluralz({ userId, channel }));
   } else {
     console.log(`Pluralz: we're hiding from user ${userId}.`)
   }
+
+  return Promise.all(requests);
 }
 
 function handlePluralz(event) {
