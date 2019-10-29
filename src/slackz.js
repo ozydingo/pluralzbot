@@ -188,7 +188,7 @@ exports.requestOauth = ({ response_url }) => {
     method: 'POST',
     url: response_url,
     headers: noAuthHeaders,
-    data: {text: "Ok, let's do this!"},
+    data: {text: "Great, let's get your authorization through Slack."},
   };
 }
 
@@ -222,11 +222,14 @@ exports.exchangeOauthCode = (code) => {
   }
 }
 
-exports.acknowledgeOauth = ({ message, response_url, channel, user_id }) => {
+exports.acknowledgeOauth = ({ message, state }) => {
+  console.log("Oauth ack:", state)
+  const { response_url, channel, user_id } = state;
   if (response_url) {
     return {
       method: 'POST',
       url: response_url,
+      headers: noAuthHeaders,
       data: {text: message},
     }
   } else if (channel && user_id) {

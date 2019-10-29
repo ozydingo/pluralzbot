@@ -124,11 +124,12 @@ async function handleOauthRedirect({ code, state }) {
   } else if (!/chat:write/.test(scope)) {
     result = {ok: false, message: 'Sorry, you must grant me acess to post messagez for this to work!'};
   } else if (token_type !== 'user') {
-    result = {ok: false, message: 'Hm, I got an incorrect token type. Try again.'};
+    result = {ok: false, message: 'Hm, I got an incorrect token type. Please try again.'};
   } else {
     await users.setToken(userId, token);
     result = {ok: true, message: "Good to go! From now on, I'll automatically correct your errorz. Type `/pluralz` if you change your mind."};
   }
+  console.log("Oauth result:", result)
   await axios(slackz.acknowledgeOauth({
     message: result.message,
     state: { response_url, channel, user_id }
