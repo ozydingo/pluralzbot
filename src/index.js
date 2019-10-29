@@ -121,7 +121,7 @@ async function handleOauthRedirect({ code, state }) {
   let result;
   if (!ok) {
     result = {ok: false, message: `Something went wrong (${data.error || "unkown error"})`};
-  } else if (!/chat:write:user/.test(scope)) {
+  } else if (!/chat:write/.test(scope)) {
     result = {ok: false, message: 'Sorry, you must grant me acess to post messagez for this to work!'};
   } else if (token_type !== 'user') {
     result = {ok: false, message: 'Hm, I got an incorrect token type. Try again.'};
