@@ -30,20 +30,23 @@ exports.main = async (req, res) => {
   if (body.challenge) {
     res.status(200).send(body.challenge);
   } else if (query.action === 'event' && body.event) {
+    res.status(200).write('');
     await handleEvent(body.event);
-    res.status(200).send('');
+    res.end();
   } else if (query.action === 'response' && body.payload) {
+    res.status(200).write('');
     await handleResponse(body.payload);
-    res.status(200).send('');
+    res.end();
   } else if (query.action === 'command') {
-    res.status(200).send('');
+    res.status(200).write('');
     await handleCommand(body);
+    res.end();
   } else if (query.action === 'oauth') {
     const { ok } = await handleOauthRedirect(query);
     if (ok) {
-      res.sendFile(__dirname + '/pages/oauth_success.html');
+      res.status(200).sendFile(__dirname + '/pages/oauth_success.html');
     } else {
-      res.sendFile(__dirname + '/pages/oauth_failure.html');
+      res.status(200).sendFile(__dirname + '/pages/oauth_failure.html');
     }
   } else {
     res.status(404).send('No action to perform.');
