@@ -25,7 +25,7 @@ test('does not match short words', () => {
 test('does not match i, u, s endings', () => {
   expect(pluralz.hasPlural("crass")).toBe(false);
   expect(pluralz.hasPlural("fabulous")).toBe(false);
-  expect(pluralz.hasPlural("candris")).toBe(false);
+  expect(pluralz.hasPlural("this")).toBe(false);
 })
 
 test('matches mid-phrase plurals', () => {
