@@ -38,18 +38,18 @@ async function setName(userId, name) {
   })
 }
 
-async function setParticipation(userId, value, { name }) {
+async function setParticipation(userId, value, { name } = {}) {
   const user = await(find_or_create(userId));
   const attrs = {participation: value};
   if (name) { attrs.name = name; }
   return collection.doc(user.id).update(attrs);
 }
 
-async function setToken(userId, token) {
+async function setToken(userId, token, { name } = {}) {
   const user = await(find_or_create(userId));
-  return collection.doc(user.id).update({
-    token: token,
-  });
+  const attrs = { token };
+  if (name) { attrs.name = name; }
+  return collection.doc(user.id).update(attrs);
 }
 
 module.exports = {

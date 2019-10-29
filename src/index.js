@@ -126,7 +126,7 @@ async function handleOauthRedirect({ code, state }) {
   } else if (token_type !== 'user') {
     result = {ok: false, message: 'Hm, I got an incorrect token type. Please try again.'};
   } else {
-    await users.setToken(userId, token);
+    await users.setToken(userId, token, {name: user.name});
     result = {ok: true, message: "Good to go! From now on, I'll automatically correct your errorz. Type `/pluralz` if you change your mind."};
   }
   console.log("Oauth result:", result)
