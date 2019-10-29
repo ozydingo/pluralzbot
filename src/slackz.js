@@ -88,10 +88,12 @@ function responseForPref({ value, response_url }) {
       text: "Sure, I'll remind you in a little while if you do it again! You can also type `/pluralz` to get my attention again."
     };
   } else if (value === 'autocorrect') {
-    return oauthBlocks({
-      state: { response_url },
-      message: "Sure! To get started, you'll need to authorize me to edit your messagez."
-    });
+    return {
+      blocks: oauthBlocks({
+        state: { response_url },
+        message: "Sure! To get started, you'll need to authorize me to edit your messagez."
+      })
+    };
   }
 }
 
