@@ -140,7 +140,7 @@ exports.settingsInquiry = ({ userId, channel }) => {
 }
 
 exports.reauth = ({ userId, channel }) => {
-  const msg = "Uh oh! You've asked me to help out your spellingz, but I don't have a working authorization token! Please grant me access or update your settings.";
+  const msg = "Uh oh! You've asked me to help out your spellingz, but I don't have a working authorization token! Please grant me access or update your settingz.";
   const data = {
     blocks: oauthBlocks({
       state: { channel, user_id: userId },
