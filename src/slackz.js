@@ -222,22 +222,32 @@ exports.exchangeOauthCode = (code) => {
   }
 }
 
-exports.acknowledgeOauth = ({ message, state }) => {
+exports.acknowledgeOauth = ({ ok, message, state }) => {
   console.log("Oauth ack:", state)
-  const { response_url, channel, user_id } = state;
+  const { response_url, channel, user_id: userId } = state;
+  const data = ok ? {text: message} : {
+    blocks: oauthBlocks({
+      state,
+      message: message
+    })
+  }
   if (response_url) {
     return {
       method: 'POST',
       url: response_url,
       headers: noAuthHeaders,
-      data: {text: message},
+      data: data,
     }
-  } else if (channel && user_id) {
+  } else if (channel && userId) {
     return {
       method: 'POST',
       url: 'https://slack.com/api/chat.postEphemeral',
       headers: authHeaders(BOT_TOKEN),
-      data: {text: message},
+      data: {
+        user: userId,
+        channel,
+        ...data
+      },
     }
   }
 }

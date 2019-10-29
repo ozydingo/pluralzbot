@@ -134,6 +134,7 @@ async function handleOauthRedirect({ code, state }) {
   }
   console.log("Oauth result:", result)
   await axios(slackz.acknowledgeOauth({
+    ok,
     message: result.message,
     state: { response_url, channel, user_id }
   })).then(response => {
@@ -162,7 +163,7 @@ async function handlePlurals(event) {
     console.log(`Pluralz: ignore user ${userId}.`)
   } else if (userData.participation === 'autocorrect' && userData.token) {
     console.log(`Pluralz: correct user ${userId}.`)
-    requests.push(correctPluralz({ ts, text, channel, token: userData.token }));
+    requests.push(correctPluralz({ userId, ts, text, channel, token: userData.token }));
   } else if (userData.participation === 'autocorrect' && !userData.token) {
     console.log(`Pluralz: requesting token for user ${userId}.`)
     requests.push(reauth({ userId, channel }));
@@ -203,9 +204,14 @@ function reauth({ userId, channel }) {
   });
 }
 
-function correctPluralz({ ts, text, channel, token }) {
+function correctPluralz({ userId, ts, text, channel, token }) {
   return axios(slackz.correction({ ts, text, channel, token })).then(response => {
     logResponse(response, "correction");
+    const { ok, error } = response.data || {};
+    if (!ok && error === 'invalid_auth') {
+      console.log("Requesting reauth");
+      return reauth({ userId, channel });
+    }
   }).catch(err => {
     logError(err, "correction");
   });
