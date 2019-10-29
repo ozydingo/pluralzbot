@@ -61,6 +61,10 @@ function logResponse(response, name="request") {
   console.log(`Response for ${name}:`, response.data);
 }
 
+function logError(error, name="requeust") {
+  console.log(`[ERROR] Response for ${name}:`, error);
+}
+
 function timeToBugAgain(buggedAt) {
   return (new Date() - buggedAt) > BUG_TIMEOUT_MILLIS;
 }
@@ -100,6 +104,8 @@ async function handleCommand({ user_id: userId, channel_id: channel }) {
   await axios(slackz.settingsInquiry({ userId, channel })).then(response => {
     users.touch(userId);
     logResponse(response, "suggestion");
+  }).catch(err => {
+    logError(err, "suggestion");
   });
 }
 
@@ -154,6 +160,8 @@ function handlePluralz(event) {
   const { ts, channel } = event;
   return axios(slackz.reactToPluralz( { ts, channel })).then(response => {
     logResponse(response, "reaction");
+  }).catch(err => {
+    logError(err, "reaction");
   });
 }
 
@@ -161,6 +169,8 @@ function suggestPluralz({ userId, channel }) {
   return axios(slackz.suggestion({ userId, channel })).then(response => {
     users.touch(userId);
     logResponse(response, "suggestion");
+  }).catch(err => {
+    logError(err, "suggestion");
   });
 }
 
@@ -168,12 +178,16 @@ function reauth({ userId, channel }) {
   return axios(slackz.reauth({ userId, channel })).then(response => {
     users.touch(userId);
     logResponse(response, "reauth");
+  }).catch(err => {
+    logError(err, "reauth");
   });
 }
 
 function correctPluralz({ ts, text, channel, token }) {
   return axios(slackz.correction({ ts, text, channel, token })).then(response => {
     logResponse(response, "correction");
+  }).catch(err => {
+    logError(err, "correction");
   });
 }
 
@@ -181,8 +195,10 @@ function handleOauthRequest({ user, response_url, value }) {
   if (value === 'grant') {
     return axios(slackz.requestOauth({ response_url }));
   } else if (value === 'cancel') {
-    users.setParticipation(user.id, 'remind', {name: user.name});
-    return axios(slackz.cancelOauth({ response_url }));
+    return Promise.all([
+      users.setParticipation(user.id, 'remind', {name: user.name}),
+      axios(slackz.cancelOauth({ response_url })),
+    ])
   }
 }
 
@@ -192,6 +208,8 @@ function setPrefs({ user, value, response_url }) {
     users.setParticipation(user.id, value, {name: user.name}),
     axios(slackz.acknowledgePrefs({ value, response_url })).then(response => {
       logResponse(response, "user interaction");
+    }).catch(err => {
+      logError(err, "user interaction");
     }),
   ]);
 }

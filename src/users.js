@@ -26,14 +26,14 @@ async function find_or_create(userId) {
 async function touch(userId) {
   const ts = new Date();
   const user = await(find_or_create(userId));
-  collection.doc(user.id).update({
+  return collection.doc(user.id).update({
     bugged_at: ts,
   });
 }
 
 async function setName(userId, name) {
   const user = await(find_or_create(userId));
-  collection.doc(user.id).update({
+  return collection.doc(user.id).update({
     name: name
   })
 }
@@ -42,12 +42,12 @@ async function setParticipation(userId, value, { name }) {
   const user = await(find_or_create(userId));
   const attrs = {participation: value};
   if (name) { attrs.name = name; }
-  collection.doc(user.id).update(attrs);
+  return collection.doc(user.id).update(attrs);
 }
 
 async function setToken(userId, token) {
   const user = await(find_or_create(userId));
-  collection.doc(user.id).update({
+  return collection.doc(user.id).update({
     token: token,
   });
 }
