@@ -133,7 +133,11 @@ async function handleOauthRedirect({ code, state }) {
   await axios(slackz.acknowledgeOauth({
     message: result.message,
     state: { response_url, channel, user_id }
-  }));
+  })).then(response => {
+    logResponse(response, "oauth ack");
+  }).catch(err => {
+    logError(err, "oauth ack");
+  });
   return result;
 }
 
@@ -194,11 +198,19 @@ function correctPluralz({ ts, text, channel, token }) {
 
 function handleOauthRequest({ user, response_url, value }) {
   if (value === 'grant') {
-    return axios(slackz.requestOauth({ response_url }));
+    return axios(slackz.requestOauth({ response_url })).then(response => {
+      logResponse(response, "request oauth");
+    }).catch(err => {
+      logError(err, "request oauth");
+    });
   } else if (value === 'cancel') {
     return Promise.all([
       users.setParticipation(user.id, 'remind', {name: user.name}),
-      axios(slackz.cancelOauth({ response_url })),
+      axios(slackz.cancelOauth({ response_url })).then(response => {
+        logResponse(response, "cancel oauth");
+      }).catch(err => {
+        logError(err, "cancel oauth");
+      }),
     ])
   }
 }
