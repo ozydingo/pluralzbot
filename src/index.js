@@ -77,13 +77,16 @@ async function handleEvent(event) {
   if (!eventInScope(event)) { return; }
 
   if (event.type === 'app_mention') {
-    await reactToMessage(event, "bananadance");
+    return reactToMessage(event, "bananadance");
   } else if (event.type === "message" && !event.subtype) {
-    if (pluralz.hazPluralz(text)) {
-      await handlePluralz(event);
-    } else if (pluralz.hasPlural(text)) {
-      await handlePlurals(event);
+    const actions = [];
+    if (pluralz.hasPlural(text)) {
+      actions.push(handlePlurals(event))
     }
+    if (pluralz.hazPluralz(text)) {
+      actions.push(handlePluralz(event));
+    }
+    return Promise.all(actions);
   }
 }
 
