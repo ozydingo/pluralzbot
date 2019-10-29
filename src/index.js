@@ -55,8 +55,7 @@ exports.main = async (req, res) => {
 
 function eventInScope(event) {
   return (
-    channel_whitelist.includes(event.channel) &&
-    event.type === "message" && !event.subtype
+    channel_whitelist.includes(event.channel)
   );
 }
 
@@ -77,10 +76,14 @@ async function handleEvent(event) {
   const { text } = event;
   if (!eventInScope(event)) { return; }
 
-  if (pluralz.hazPluralz(text)) {
-    await handlePluralz(event);
-  } else if (pluralz.hasPlural(text)) {
-    await handlePlurals(event);
+  if (event.type === 'app_mention') {
+    await reactToMessage(event, "bananadance");
+  } else if (event.type === "message" && !event.subtype) {
+    if (pluralz.hazPluralz(text)) {
+      await handlePluralz(event);
+    } else if (pluralz.hasPlural(text)) {
+      await handlePlurals(event);
+    }
   }
 }
 
@@ -178,14 +181,18 @@ async function handlePlurals(event) {
 }
 
 function handlePluralz(event) {
-  const { ts, channel } = event;
-
   if (Math.random() < 0.35) {
     console.log("Deciding to stay quiet for this pluralz.");
     return;
   }
 
-  return axios(slackz.reactToPluralz( { ts, channel })).then(response => {
+  return reactToMessage(event, "3play");
+}
+
+function reactToMessage(event, reaction) {
+  const { ts, channel } = event;
+
+  return axios(slackz.reactToPluralz( { ts, channel, reaction })).then(response => {
     logResponse(response, "reaction");
   }).catch(err => {
     logError(err, "reaction");

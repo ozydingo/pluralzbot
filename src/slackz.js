@@ -201,7 +201,7 @@ exports.cancelOauth = ({ response_url }) => {
   };
 }
 
-exports.reactToPluralz = ({ ts, channel }) => {
+exports.reactToPluralz = ({ ts, channel, reaction }) => {
   return {
     method: 'POST',
     url: 'https://slack.com/api/reactions.add',
@@ -209,7 +209,7 @@ exports.reactToPluralz = ({ ts, channel }) => {
     data: {
       channel: channel,
       timestamp: ts,
-      name: '3play',
+      name: reaction,
     }
   }
 }
