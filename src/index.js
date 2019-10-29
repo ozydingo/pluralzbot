@@ -179,6 +179,12 @@ async function handlePlurals(event) {
 
 function handlePluralz(event) {
   const { ts, channel } = event;
+
+  if (Math.random() < 0.35) {
+    console.log("Deciding to stay quiet for this pluralz.");
+    return;
+  }
+
   return axios(slackz.reactToPluralz( { ts, channel })).then(response => {
     logResponse(response, "reaction");
   }).catch(err => {
