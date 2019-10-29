@@ -1,7 +1,7 @@
 // This is a funuction becase `exec` can only be rnu once?
 function pattern() {
   // Rough cut: ends in s following not i, u, or s.
-  return /\b(\w{3,})(?<![ius])s([.?!]*)\b/g;
+  return /(?<!\w\.)\b(\w{3,})(?<![ius])s([.?!]*)\b(?!\.\w)(?!\:\/)/g;
 }
 
 exports.replace = (text) => {

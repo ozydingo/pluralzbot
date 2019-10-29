@@ -44,3 +44,8 @@ test('replaces plurals correctly', () => {
   expect(pluralz.replace("nuts is the names")).toBe("nutz is the namez");
   expect(pluralz.replace("nuts is crass")).toBe("nutz is crass");
 })
+
+test('does not replace URL content', () => {
+  expect(pluralz.replace("https://www.nuts.com/")).toBe("https://www.nuts.com/")
+  expect(pluralz.replace("nuts here: https://www.nuts.com/")).toBe("nutz here: https://www.nuts.com/")
+})
