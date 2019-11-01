@@ -44,6 +44,7 @@ test('replaces plurals correctly', () => {
   expect(pluralz.replace("nuts is the names")).toBe("nutz is the namez");
   expect(pluralz.replace("nuts is crass")).toBe("nutz is crass");
   expect(pluralz.replace("this is nuts")).toBe("this is nutz")
+  expect(pluralz.replace("this is nuts, yo")).toBe("this is nutz, yo")
 })
 
 test('does not replace URL content', () => {
@@ -52,4 +53,14 @@ test('does not replace URL content', () => {
   expect(pluralz.replace("things.com")).toBe("things.com")
   expect(pluralz.replace("docs.domain.com")).toBe("docs.domain.com")
   expect(pluralz.replace("this.is.nuts")).toBe("this.is.nuts")
+  expect(pluralz.replace("www.foo-bars-baz.com")).toBe("www.foo-bars-baz.com")
+  expect(pluralz.replace("www.nuts.com/this/is/nuts")).toBe("www.nuts.com/this/is/nuts")
+  expect(pluralz.replace("www.nuts.com/this-is-nuts")).toBe("www.nuts.com/this-is-nuts")
+})
+
+test('matches pluralz', () => {
+  expect(pluralz.hazPluralz("nutz")).toBe(true);
+  expect(pluralz.hazPluralz("nuts")).toBe(false);
+  expect(pluralz.hazPluralz("bazzar")).toBe(false);
+  expect(pluralz.hazPluralz("this is nutz, yo")).toBe(true);
 })
