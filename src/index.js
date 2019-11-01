@@ -1,6 +1,5 @@
 const bug_timeout = Number(process.env.BUG_TIMEOUT || 1);
 const BUG_TIMEOUT_MILLIS = bug_timeout * 60 * 1000;
-const channel_whitelist = (process.env.CHANNEL_WHITELIST || []).split(/\s*,\s*/);
 // const VERIFICATION_TOKEN = process.env.VERIFICATION_TOKEN;
 
 const axios = require('axios');
@@ -53,12 +52,6 @@ exports.main = async (req, res) => {
   }
 };
 
-function eventInScope(event) {
-  return (
-    channel_whitelist.includes(event.channel)
-  );
-}
-
 function logResponse(response, name="request") {
   console.log(`Response for ${name}:`, response.data);
 }
@@ -74,7 +67,6 @@ function timeToBugAgain(buggedAt) {
 async function handleEvent(event) {
   console.log("Handling event", event);
   const { text } = event;
-  if (!eventInScope(event)) { return; }
 
   if (event.type === 'app_mention') {
     return reactToMessage(event, "bananadance");
