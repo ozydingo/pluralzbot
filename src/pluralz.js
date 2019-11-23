@@ -2,9 +2,11 @@
 const pluralsPattern = /(?<=\s|^)(\w{3,})(?<![ius])s([?!.,]*)(?=\s|$)/g;
 const pluralzPattern = /\b(\w{2,})z([.?!]*)\b/;
 
+const z = require("./z");
+
 exports.replace = (text) => {
   if (/`/.test(text)) { return text; }
-  return text.replace(pluralsPattern, "$1z$2");
+  return z.replacez(text);
 }
 
 exports.hasPlural = (text) => {
