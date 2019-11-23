@@ -5,7 +5,7 @@ const BUG_TIMEOUT_MILLIS = bug_timeout * 60 * 1000;
 const axios = require('axios');
 const pluralz = require('./pluralz');
 const slackz = require('./slackz');
-const users = require('./users');
+const userz = require('./userz');
 
 // Main event function handler
 exports.main = async (req, res) => {
@@ -103,7 +103,7 @@ async function handleResponse(payloadStr) {
 async function handleCommand({ user_id: userId, channel_id: channel }) {
   console.log("Handling command", { userId, channel });
   await axios(slackz.settingsInquiry({ userId, channel })).then(response => {
-    users.touch(userId);
+    userz.touch(userId);
     logResponse(response, "suggestion");
   }).catch(err => {
     logError(err, "suggestion");
@@ -127,7 +127,7 @@ async function handleOauthRedirect({ code, state }) {
   } else if (token_type !== 'user') {
     result = {ok: false, message: 'Hm, I got an incorrect token type. Please try again.'};
   } else {
-    await users.setToken(userId, token, {name: user.name});
+    await userz.setToken(userId, token, {name: user.name});
     result = {ok: true, message: "Good to go! From now on, I'll automatically correct your errorz. Type `/pluralz` if you change your mind."};
   }
   console.log("Oauth result:", result)
@@ -145,7 +145,7 @@ async function handleOauthRedirect({ code, state }) {
 
 async function handlePlurals(event) {
   const { ts, text, channel, user: userId } = event;
-  const user = await users.find_or_create(userId);
+  const user = await userz.find_or_create(userId);
   const userData = user.data();
   const lastEventId = userData.lastEventId;
   const requests = [];
@@ -154,7 +154,7 @@ async function handlePlurals(event) {
     console.log(`Pluralz: ignore dup event ${lastEventId}`);
     return;
   } else if (event.client_msg_id) {
-    requests.push(users.setLastEventId(user, event.client_msg_id));
+    requests.push(userz.setLastEventId(user, event.client_msg_id));
   }
 
   if (userData.participation === 'ignore') {
@@ -196,7 +196,7 @@ function reactToMessage(event, reaction) {
 
 function suggestPluralz({ userId, channel }) {
   return axios(slackz.suggestion({ userId, channel })).then(response => {
-    users.touch(userId);
+    userz.touch(userId);
     logResponse(response, "suggestion");
   }).catch(err => {
     logError(err, "suggestion");
@@ -205,7 +205,7 @@ function suggestPluralz({ userId, channel }) {
 
 function reauth({ userId, channel }) {
   return axios(slackz.reauth({ userId, channel })).then(response => {
-    users.touch(userId);
+    userz.touch(userId);
     logResponse(response, "reauth");
   }).catch(err => {
     logError(err, "reauth");
@@ -234,7 +234,7 @@ function handleOauthRequest({ user, response_url, value }) {
     });
   } else if (value === 'cancel') {
     return Promise.all([
-      users.setParticipation(user.id, 'remind', {name: user.name}),
+      userz.setParticipation(user.id, 'remind', {name: user.name}),
       axios(slackz.cancelOauth({ response_url })).then(response => {
         logResponse(response, "cancel oauth");
       }).catch(err => {
@@ -247,7 +247,7 @@ function handleOauthRequest({ user, response_url, value }) {
 function setPrefs({ user, value, response_url }) {
   console.log(`Setting user ${user.id} to ${value}`);
   return Promise.all([
-    users.setParticipation(user.id, value, {name: user.name}),
+    userz.setParticipation(user.id, value, {name: user.name}),
     axios(slackz.acknowledgePrefs({ value, response_url })).then(response => {
       logResponse(response, "user interaction");
     }).catch(err => {
@@ -257,5 +257,5 @@ function setPrefs({ user, value, response_url }) {
 }
 
 function setUsername({ id, name }) {
-  return users.setName(id, name);
+  return userz.setName(id, name);
 }
