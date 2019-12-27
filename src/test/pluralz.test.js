@@ -55,10 +55,10 @@ test('does not replace anything when backticks are present', () => {
 })
 
 test('handles punctuation', () => {
-  expect(pluralz.replace("nuts?")).toBe("nutz ?");
-  expect(pluralz.replace("this is nuts, yo")).toBe("this is nutz , yo");
+  expect(pluralz.replace("nuts?")).toBe("nutz?");
+  expect(pluralz.replace("this is nuts, yo")).toBe("this is nutz, yo");
   expect(pluralz.replace("So many mice, geese, and other animals in the house.")).
-    toBe("So many mousez , goosez , and other animalz in the house.");
+    toBe("So many mousez, goosez, and other animalz in the house.");
 })
 
 test('does not replace URL content', () => {
