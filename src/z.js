@@ -4,6 +4,9 @@ const pluralize = require("pluralize");
 const ACCEPTED_TAG_TYPE = ["NNS", "NNPS"];
 const SYMBOL_TAG_TYPE = [",", ".", ":", "$", "#", '"', ")", "("];
 
+const lexer = new pos.Lexer();
+const tagger = new pos.Tagger();
+
 function isAnEmoji(currentIndex, taggedWords) {
   return (
     taggedWords[currentIndex + 2] &&
@@ -14,9 +17,8 @@ function isAnEmoji(currentIndex, taggedWords) {
 class Z {
   constructor(sentence) {
     this.sentence = sentence;
-    this.words = new pos.Lexer().lex(sentence);
-    this.tagger = new pos.Tagger();
-    this.taggedWords = this.tagger.tag(this.words);
+    this.words = lexer.lex(sentence);
+    this.taggedWords = tagger.tag(this.words);
     this.sentenceWordz = sentence.split(" ");
   }
 
