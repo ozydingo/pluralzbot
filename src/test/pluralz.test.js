@@ -33,18 +33,20 @@ test('matches mid-phrase plurals', () => {
 })
 
 test('replaces plurals correctly', () => {
-  expect(pluralz.replace("ns")).toBe("ns");
+  expect(pluralz.replace("ns")).toBe("nz");
   expect(pluralz.replace("nuts")).toBe("nutz");
   expect(pluralz.replace("`nuts`")).toBe("`nuts`");
   expect(pluralz.replace("notes")).toBe("notez");
-  expect(pluralz.replace("nuts?")).toBe("nutz?");
+  expect(pluralz.replace("nuts?")).toBe("nutz ?");
   expect(pluralz.replace("bananas")).toBe("bananaz");
   expect(pluralz.replace("crass")).toBe("crass");
   expect(pluralz.replace("nuts is the name")).toBe("nutz is the name");
   expect(pluralz.replace("nuts is the names")).toBe("nutz is the namez");
   expect(pluralz.replace("nuts is crass")).toBe("nutz is crass");
-  expect(pluralz.replace("this is nuts")).toBe("this is nutz")
-  expect(pluralz.replace("this is nuts, yo")).toBe("this is nutz, yo")
+  expect(pluralz.replace("this is nuts")).toBe("this is nutz");
+  expect(pluralz.replace("this is nuts, yo")).toBe("this is nutz , yo");
+  expect(pluralz.replace("So many mice, geese, and other animals in the house.")).
+    toBe("So many mousez , goosez , and other animalz in the house.");
 })
 
 test('does not replace URL content', () => {
