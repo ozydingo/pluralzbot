@@ -3,6 +3,7 @@ const pluralz = require('pluralz');
 test('matches normal plural words', () => {
   expect(pluralz.hasPlural("nuts")).toBe(true);
   expect(pluralz.hasPlural("notes")).toBe(true);
+  expect(pluralz.hasPlural("ns")).toBe(true);
 })
 
 test('matches with punctuation', () => {
@@ -15,11 +16,6 @@ test('matches with punctuation', () => {
 
 test('ignores phrases with backticks', () => {
   expect(pluralz.hasPlural("`nuts`")).toBe(false);
-})
-
-test('does not match short words', () => {
-  expect(pluralz.hasPlural("ns")).toBe(false);
-  expect(pluralz.hasPlural("ans")).toBe(false);
 })
 
 test('does not match i, u, s endings', () => {
