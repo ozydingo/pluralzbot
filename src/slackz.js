@@ -13,9 +13,9 @@ const noAuthHeaders = {
 const oauthUrl = ({ response_url, channel, user_id }) => {
   const state = { response_url, channel, user_id };
   const stateStr = encodeURIComponent(JSON.stringify(state));
-  const paramstr = `user_scope=chat:write&client_id=${CLIENT_ID}&state=${stateStr}`
+  const paramstr = `user_scope=chat:write&client_id=${CLIENT_ID}&state=${stateStr}`;
   return `https://slack.com/oauth/v2/authorize?${paramstr}`;
-}
+};
 
 function settingsButton({ text, value, style }) {
   const button = {
@@ -38,7 +38,7 @@ const actionBlock = {
     settingsButton({text: "Remind me later", value: "remind"}),
     settingsButton({text: "Please stop", value: "ignore"}),
   ]
-}
+};
 
 const oauthBlocks = ({ state, message }) => (
   [
@@ -74,7 +74,7 @@ const oauthBlocks = ({ state, message }) => (
       ]
     }
   ]
-)
+);
 
 function responseForPref({ value, response_url }) {
   if (value === 'ignore') {
@@ -105,7 +105,7 @@ function settingsInquiry({ userId, channel, text }) {
       }
     },
     actionBlock,
-  ]
+  ];
 
   const data = {
     blocks: blocks,
@@ -127,7 +127,7 @@ exports.suggestion = ({ userId, channel }) => {
     channel,
     text: 'It lookz like you may have made some spelling errorz. Would you like to correct your mistakez?',
   });
-}
+};
 
 exports.settingsInquiry = ({ userId, channel }) => {
   return settingsInquiry({
@@ -135,10 +135,11 @@ exports.settingsInquiry = ({ userId, channel }) => {
     channel,
     text: 'How would you like me to correct your mistakez?',
   });
-}
+};
 
 exports.reauth = ({ userId, channel }) => {
-  const msg = "Uh oh! You've asked me to help out your spellingz, but I don't have a working authorization token! Please grant me access or update your settingz.";
+  const msg = "Uh oh! You've asked me to help out your spellingz, but " +
+    "I don't have a working authorization token! Please grant me access or update your settingz.";
   const data = {
     blocks: oauthBlocks({
       state: { channel, user_id: userId },
@@ -154,7 +155,7 @@ exports.reauth = ({ userId, channel }) => {
     headers: authHeaders(BOT_TOKEN),
     data: data,
   };
-}
+};
 
 exports.edit = ({ token, channel, ts, newText }) => {
   const data = {
@@ -170,7 +171,7 @@ exports.edit = ({ token, channel, ts, newText }) => {
     headers: authHeaders(token),
     data: data,
   };
-}
+};
 
 exports.acknowledgePrefs = ({ value, response_url }) => {
   return {
@@ -178,8 +179,8 @@ exports.acknowledgePrefs = ({ value, response_url }) => {
     url: response_url,
     headers: noAuthHeaders,
     data: responseForPref({ value, response_url }),
-  }
-}
+  };
+};
 
 exports.requestOauth = ({ response_url }) => {
   return {
@@ -188,7 +189,7 @@ exports.requestOauth = ({ response_url }) => {
     headers: noAuthHeaders,
     data: {text: "Great, let's get your authorization through Slack."},
   };
-}
+};
 
 exports.cancelOauth = ({ response_url }) => {
   return {
@@ -197,7 +198,7 @@ exports.cancelOauth = ({ response_url }) => {
     headers: noAuthHeaders,
     data: {text: "Sure. I may ask again in a little while."},
   };
-}
+};
 
 exports.reactToPluralz = ({ ts, channel, reaction }) => {
   return {
@@ -209,33 +210,33 @@ exports.reactToPluralz = ({ ts, channel, reaction }) => {
       timestamp: ts,
       name: reaction,
     }
-  }
-}
+  };
+};
 
 exports.exchangeOauthCode = (code) => {
   return {
     method: 'POST',
     url: 'https://slack.com/api/oauth.v2.access',
     data: `code=${code}&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}`
-  }
-}
+  };
+};
 
 exports.acknowledgeOauth = ({ ok, message, state }) => {
-  console.log("Oauth ack:", state)
+  console.log("Oauth ack:", state);
   const { response_url, channel, user_id: userId } = state;
   const data = ok ? {text: message} : {
     blocks: oauthBlocks({
       state,
       message: message
     })
-  }
+  };
   if (response_url) {
     return {
       method: 'POST',
       url: response_url,
       headers: noAuthHeaders,
       data: data,
-    }
+    };
   } else if (channel && userId) {
     return {
       method: 'POST',
@@ -246,6 +247,6 @@ exports.acknowledgeOauth = ({ ok, message, state }) => {
         channel,
         ...data
       },
-    }
+    };
   }
-}
+};

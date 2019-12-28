@@ -27,4 +27,4 @@ module.exports = {
   timeToBugAgain,
   messageAction,
   ignorePluralz,
-}
+};

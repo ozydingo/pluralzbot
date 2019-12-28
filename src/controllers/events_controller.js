@@ -10,7 +10,7 @@ async function respond(req, res) {
   const { body } = req;
   if (!body.event) {
     res.status(200).send();
-    return
+    return;
   }
 
   res.status(200).write('');
@@ -28,7 +28,7 @@ async function handleEvent(event) {
     const actions = [];
     const pluralz = new Pluralz(text);
     if (pluralz.hasPlurals()) {
-      actions.push(handlePlurals(event, pluralz))
+      actions.push(handlePlurals(event, pluralz));
     }
     if (pluralz.hasPluralz()) {
       actions.push(handlePluralz(event));
@@ -54,20 +54,20 @@ async function handlePlurals(event, pluralz) {
   const action = interactionz.messageAction(userData);
 
   if (action === "ignore") {
-    console.log(`Pluralz: ignore user ${userId}.`)
+    console.log(`Pluralz: ignore user ${userId}.`);
   } else if (action === "correct") {
-    console.log(`Pluralz: correct user ${userId}.`)
+    console.log(`Pluralz: correct user ${userId}.`);
     requests.push(correctPluralz({ userId, ts, newText: pluralz.replace(text), channel, token: userData.token }));
   } else if (action === "reauth") {
-    console.log(`Pluralz: requesting token for user ${userId}.`)
+    console.log(`Pluralz: requesting token for user ${userId}.`);
     requests.push(reauth({ userId, channel }));
-    axios(slackz.reauth({ userId, channel }))
+    axios(slackz.reauth({ userId, channel }));
 
   } else if (action === "suggest") {
-    console.log(`Pluralz: time to bug user ${userId}! Last bug time: ${userData.bugged_at && userData.bugged_at.toDate()}`)
+    console.log(`Pluralz: time to bug user ${userId}! Last bug time: ${userData.bugged_at && userData.bugged_at.toDate()}`);
     requests.push(suggestPluralz({ userId, channel }));
   } else {
-    console.log(`Pluralz: we're hiding from user ${userId}.`)
+    console.log(`Pluralz: we're hiding from user ${userId}.`);
   }
 
   return Promise.all(requests);

@@ -35,7 +35,7 @@ async function setName(userId, name) {
   const user = await(find_or_create(userId));
   return collection.doc(user.id).update({
     name: name
-  })
+  });
 }
 
 async function setParticipation(userId, value, { name } = {}) {

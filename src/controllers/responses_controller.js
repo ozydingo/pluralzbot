@@ -7,7 +7,7 @@ async function respond(req, res) {
   const { body } = req;
   if (!body.payload) {
     res.status(200).send();
-    return
+    return;
   }
 
   res.status(200).write('');
@@ -64,7 +64,7 @@ function handleOauthRequest({ user, response_url, value }) {
       }).catch(err => {
         logError(err, "cancel oauth");
       }),
-    ])
+    ]);
   }
 }
 

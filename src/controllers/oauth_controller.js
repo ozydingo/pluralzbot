@@ -34,7 +34,7 @@ async function handleOauthRedirect({ code, state }) {
     await userz.setToken(userId, token, {name: user.name});
     result = {ok: true, message: "Good to go! From now on, I'll automatically correct your errorz. Type `/pluralz` if you change your mind."};
   }
-  console.log("Oauth result:", result)
+  console.log("Oauth result:", result);
   await axios(slackz.acknowledgeOauth({
     ok,
     message: result.message,
