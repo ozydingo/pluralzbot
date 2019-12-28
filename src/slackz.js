@@ -95,7 +95,7 @@ function responseForPref({ value, response_url }) {
   }
 }
 
-function settingsInquiry({ userId, channel, text }) {
+function basicDialog({ userId, channel, text }) {
   const blocks = [
     {
       type: "section",
@@ -121,23 +121,23 @@ function settingsInquiry({ userId, channel, text }) {
   };
 }
 
-exports.suggestion = ({ userId, channel }) => {
-  return settingsInquiry({
+function suggestion({ userId, channel }) {
+  return basicDialog({
     userId,
     channel,
     text: 'It lookz like you may have made some spelling errorz. Would you like to correct your mistakez?',
   });
-};
+}
 
-exports.settingsInquiry = ({ userId, channel }) => {
-  return settingsInquiry({
+function settingsInquiry({ userId, channel }) {
+  return basicDialog({
     userId,
     channel,
     text: 'How would you like me to correct your mistakez?',
   });
-};
+}
 
-exports.reauth = ({ userId, channel }) => {
+function reauth({ userId, channel }) {
   const msg = "Uh oh! You've asked me to help out your spellingz, but " +
     "I don't have a working authorization token! Please grant me access or update your settingz.";
   const data = {
@@ -155,9 +155,9 @@ exports.reauth = ({ userId, channel }) => {
     headers: authHeaders(BOT_TOKEN),
     data: data,
   };
-};
+}
 
-exports.edit = ({ token, channel, ts, newText }) => {
+function editMessage({ token, channel, ts, newText }) {
   const data = {
     text: newText,
     ts: ts,
@@ -171,36 +171,36 @@ exports.edit = ({ token, channel, ts, newText }) => {
     headers: authHeaders(token),
     data: data,
   };
-};
+}
 
-exports.acknowledgePrefs = ({ value, response_url }) => {
+function acknowledgePrefs({ value, response_url }) {
   return {
     method: 'POST',
     url: response_url,
     headers: noAuthHeaders,
     data: responseForPref({ value, response_url }),
   };
-};
+}
 
-exports.requestOauth = ({ response_url }) => {
+function requestOauth({ response_url }) {
   return {
     method: 'POST',
     url: response_url,
     headers: noAuthHeaders,
     data: {text: "Great, let's get your authorization through Slack."},
   };
-};
+}
 
-exports.cancelOauth = ({ response_url }) => {
+function cancelOauth({ response_url }) {
   return {
     method: 'POST',
     url: response_url,
     headers: noAuthHeaders,
     data: {text: "Sure. I may ask again in a little while."},
   };
-};
+}
 
-exports.reactToPluralz = ({ ts, channel, reaction }) => {
+function reactToPluralz({ ts, channel, reaction }) {
   return {
     method: 'POST',
     url: 'https://slack.com/api/reactions.add',
@@ -211,25 +211,30 @@ exports.reactToPluralz = ({ ts, channel, reaction }) => {
       name: reaction,
     }
   };
-};
+}
 
-exports.exchangeOauthCode = (code) => {
+function exchangeOauthCode(code) {
   return {
     method: 'POST',
     url: 'https://slack.com/api/oauth.v2.access',
     data: `code=${code}&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}`
   };
-};
+}
 
-exports.acknowledgeOauth = ({ ok, message, state }) => {
+function acknowledgeOauth({ ok, message, state }) {
   console.log("Oauth ack:", state);
   const { response_url, channel, user_id: userId } = state;
+
+  // If oauth did not succeed or was not granted, ask again.
   const data = ok ? {text: message} : {
     blocks: oauthBlocks({
       state,
       message: message
     })
   };
+
+  // Respond to response_url if present, else to an ephemeral post.
+  // TODO: Why would we have vs not have a response url?
   if (response_url) {
     return {
       method: 'POST',
@@ -249,4 +254,17 @@ exports.acknowledgeOauth = ({ ok, message, state }) => {
       },
     };
   }
+}
+
+module.exports = {
+  acknowledgeOauth,
+  acknowledgePrefs,
+  cancelOauth,
+  editMessage,
+  exchangeOauthCode,
+  reauth,
+  suggestion,
+  settingsInquiry,
+  requestOauth,
+  reactToPluralz,
 };

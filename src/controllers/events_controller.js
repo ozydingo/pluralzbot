@@ -61,8 +61,6 @@ async function handlePlurals(event, pluralz) {
   } else if (action === "reauth") {
     console.log(`Pluralz: requesting token for user ${userId}.`);
     requests.push(reauth({ userId, channel }));
-    axios(slackz.reauth({ userId, channel }));
-
   } else if (action === "suggest") {
     console.log(`Pluralz: time to bug user ${userId}! Last bug time: ${userData.bugged_at && userData.bugged_at.toDate()}`);
     requests.push(suggestPluralz({ userId, channel }));
@@ -102,7 +100,7 @@ function suggestPluralz({ userId, channel }) {
 }
 
 function correctPluralz({ userId, ts, newText, channel, token }) {
-  return axios(slackz.edit({ token, channel, ts, newText })).then(response => {
+  return axios(slackz.editMessage({ token, channel, ts, newText })).then(response => {
     logResponse(response, "correction");
     const { ok, error } = response.data || {};
     if (!ok && error === 'invalid_auth') {
