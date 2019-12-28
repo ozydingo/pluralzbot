@@ -18,6 +18,10 @@ function findWhitespace(word, containingText) {
   return whitespace;
 }
 
+function isPlural(word, tag) {
+  return ACCEPTED_TAG_TYPE.includes(tag) && pluralize.isPlural(word);
+}
+
 class Z {
   constructor(sentence) {
     this.taggedWords = this.tagWords(sentence)
@@ -43,16 +47,12 @@ class Z {
   }
 
   replace() {
-    const wordz = []
-    for (let ii = 0; ii < this.taggedWords.length; ii++) {
-      let { word, tag, whitespace } = this.taggedWords[ii];
-
-      if (ACCEPTED_TAG_TYPE.includes(tag) && pluralize.isPlural(word)) {
+    const wordz = this.taggedWords.map(({ word, tag, whitespace }) => {
+      if (isPlural(word, tag)) {
         word = pluralize.singular(word) + "z";
       }
-
-      wordz.push(word + whitespace);
-    }
+      return word + whitespace;
+    })
     return wordz.join("");
   }
 }
