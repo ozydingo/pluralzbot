@@ -19,6 +19,23 @@
       "jest/no-focused-tests": "error",
       "jest/no-identical-title": "error",
       "jest/prefer-to-have-length": "warn",
-      "jest/valid-expect": "error"
+      "jest/valid-expect": "error",
+      "keyword-spacing": "warn",
+      "max-len": ["warn", 150, 4],
+      "no-nested-ternary": "warn",
+      "no-var": "error",
+      "no-whitespace-before-property": "error",
+      "prefer-const": "warn",
+      "semi": "warn",
+      "space-before-function-paren": ["error", {
+        "anonymous": "never",
+        "named": "never",
+        "asyncArrow": "always"
+      }],
+      "space-infix-ops": "warn",
+      "space-unary-ops": ["warn", {
+        "words": false,
+        "nonwords": false
+      }]
     }
 }

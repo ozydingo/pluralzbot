@@ -11,12 +11,12 @@ const mockOldDate = {
 test("Repsects a timeout in bugging", () => {
   const buggedAt = mockRecentDate.toDate();
   expect(interactionz.timeToBugAgain(buggedAt)).toBe(false);
-})
+});
 
 test("Bugs again", () => {
   const buggedAt = mockOldDate.toDate();
   expect(interactionz.timeToBugAgain(buggedAt)).toBe(true);
-})
+});
 
 test("the message decision tree", () => {
   expect(interactionz.messageAction({participation: "ignore"})).toBe("ignore");
@@ -26,4 +26,4 @@ test("the message decision tree", () => {
   expect(interactionz.messageAction({participation: "remind", bugged_at: mockOldDate})).toBe("suggest");
   expect(interactionz.messageAction({participation: "remind"})).toBe("suggest");
   expect(interactionz.messageAction({})).toBe("suggest");
-})
+});
