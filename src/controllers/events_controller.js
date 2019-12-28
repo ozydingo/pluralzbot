@@ -4,7 +4,7 @@ const { logError, logResponse } = require('../logging');
 const slackz = require('../slackz');
 const userz = require('../userz');
 
-const { Z } = require('../z');
+const { Pluralz } = require('../pluralz');
 
 async function respond(req, res) {
   const { body } = req;
@@ -26,18 +26,18 @@ async function handleEvent(event) {
     return reactToMessage(event, "bananadance");
   } else if (event.type === "message" && !event.subtype) {
     const actions = [];
-    const z = new Z(text);
-    if (z.hasPlurals()) {
-      actions.push(handlePlurals(event, z))
+    const pluralz = new Pluralz(text);
+    if (pluralz.hasPlurals()) {
+      actions.push(handlePlurals(event, pluralz))
     }
-    if (z.hasPluralz()) {
+    if (pluralz.hasPluralz()) {
       actions.push(handlePluralz(event));
     }
     return Promise.all(actions);
   }
 }
 
-async function handlePlurals(event, z) {
+async function handlePlurals(event, pluralz) {
   const { ts, text, channel, user: userId } = event;
   const user = await userz.find_or_create(userId);
   const userData = user.data();
@@ -57,7 +57,7 @@ async function handlePlurals(event, z) {
     console.log(`Pluralz: ignore user ${userId}.`)
   } else if (action === "correct") {
     console.log(`Pluralz: correct user ${userId}.`)
-    requests.push(correctPluralz({ userId, ts, newText: z.replace(text), channel, token: userData.token }));
+    requests.push(correctPluralz({ userId, ts, newText: pluralz.replace(text), channel, token: userData.token }));
   } else if (action === "reauth") {
     console.log(`Pluralz: requesting token for user ${userId}.`)
     requests.push(reauth({ userId, channel }));
