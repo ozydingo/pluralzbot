@@ -224,12 +224,17 @@ function exchangeOauthCode(code) {
 function acknowledgeOauth({ ok, message, state }) {
   console.log("Oauth ack:", state);
   const { response_url, channel, user_id: userId } = state;
+
+  // If oauth did not succeed or was not granted, ask again.
   const data = ok ? {text: message} : {
     blocks: oauthBlocks({
       state,
       message: message
     })
   };
+
+  // Respond to response_url if present, else to an ephemeral post.
+  // TODO: Why would we have vs not have a response url?
   if (response_url) {
     return {
       method: 'POST',
