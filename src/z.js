@@ -1,56 +1,62 @@
-var pos = require("ni-pos");
-var pluralize = require("pluralize");
+const pos = require("ni-pos");
+const pluralize = require("pluralize");
 
 const ACCEPTED_TAG_TYPE = ["NNS", "NNPS"];
-const SYMBOL_TAG_TYPE = [",", ".", ":", "$", "#", '"', ")", "("];
+const EMOJI_REGEXP = /:\w+:/
 
-function isAnEmoji(currentIndex, taggedWords) {
-  return (
-    taggedWords[currentIndex + 2] && 
-    taggedWords[currentIndex + 2][0] === ":"
-  );
+const lexer = new pos.Lexer();
+// Add support for Slack emoji in lexing
+lexer.regexs = [EMOJI_REGEXP, ...lexer.regexs]
+const tagger = new pos.Tagger();
+
+function findWhitespace(word, containingText) {
+  // Make RegExp safe
+  const escapedWord = word.replace(/([^\w])/g, '\\$1')
+  const whitespacePattern = new RegExp(escapedWord + "(\\s*)");
+  const match = whitespacePattern.exec(containingText);
+  const whitespace = match ? match[1] : '';
+  return whitespace;
 }
 
-function replacez(sentence){
-  var sentenceWordz = sentence.split(" ");
-  var words = new pos.Lexer().lex(sentence);
-  var wordz = [];
-  var tagger = new pos.Tagger();
-  var taggedWords = tagger.tag(words);
-  for (var i = 0; i < taggedWords.length; i++) {
-    var taggedWord = taggedWords[i];
-    var word = taggedWord[0];
-    var tag = taggedWord[1];
+function isPlural(word, tag) {
+  return ACCEPTED_TAG_TYPE.includes(tag) && pluralize.isPlural(word);
+}
 
-    if (ACCEPTED_TAG_TYPE.includes(tag) && pluralize.isPlural(word)) {
-      word = pluralize.singular(word) + "z";
-    }
-
-    if (SYMBOL_TAG_TYPE.includes(tag)) {
-      // Combine current word with the next 2, if emoji
-      // Slack emoji format example :partyparrot:
-      if (word === ":" && isAnEmoji(Number(i), taggedWords)) {
-        word = word + taggedWords[i + 1][0] + ":";
-        i += 2;
-      }
-
-      // Lexer treats symbols as a type. To check if the symbol had a space between itself and the previous word
-      // 1. combine the symbol with the previous word and see if that word exists in the original sentence
-      // 2. if so, push the combined word to the new word array
-      // 3. if not, push the previous word, followed by the symbol to the new array
-      previousWord = wordz.pop();
-      wordWithSymbol = previousWord + word;     
-      if (sentenceWordz.includes(wordWithSymbol)) {
-        word = wordWithSymbol;
-      } else {
-        wordz.push(previousWord);
-      }
-    }
-    wordz.push(word);
+class Z {
+  constructor(sentence) {
+    this.taggedWords = this.tagWords(sentence)
   }
-  return wordz.join(" ");
+
+  // Get POS tagging and keep track of whitespace after word
+  tagWords(sentence) {
+    const words = lexer.lex(sentence);
+    const posTagged = tagger.tag(words);
+    let index = 0;
+    const taggedWords = posTagged.map(([word, tag]) => {
+      const whitespace = findWhitespace(word, sentence.slice(index))
+      index += word.length + whitespace.length;
+      return { word, tag, whitespace };
+    })
+    return taggedWords;
+  }
+
+  hasPlurals() {
+    return this.taggedWords.some(({ word, tag }) => {
+      return ACCEPTED_TAG_TYPE.includes(tag) && pluralize.isPlural(word)
+    });
+  }
+
+  replace() {
+    const wordz = this.taggedWords.map(({ word, tag, whitespace }) => {
+      if (isPlural(word, tag)) {
+        word = pluralize.singular(word) + "z";
+      }
+      return word + whitespace;
+    })
+    return wordz.join("");
+  }
 }
 
 module.exports = {
-  replacez
+  Z
 }
