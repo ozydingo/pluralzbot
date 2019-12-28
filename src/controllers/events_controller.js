@@ -61,8 +61,6 @@ async function handlePlurals(event, pluralz) {
   } else if (action === "reauth") {
     console.log(`Pluralz: requesting token for user ${userId}.`);
     requests.push(reauth({ userId, channel }));
-    axios(slackz.reauth({ userId, channel }));
-
   } else if (action === "suggest") {
     console.log(`Pluralz: time to bug user ${userId}! Last bug time: ${userData.bugged_at && userData.bugged_at.toDate()}`);
     requests.push(suggestPluralz({ userId, channel }));
