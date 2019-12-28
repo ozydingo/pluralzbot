@@ -100,7 +100,7 @@ function suggestPluralz({ userId, channel }) {
 }
 
 function correctPluralz({ userId, ts, newText, channel, token }) {
-  return axios(slackz.edit({ token, channel, ts, newText })).then(response => {
+  return axios(slackz.editMessage({ token, channel, ts, newText })).then(response => {
     logResponse(response, "correction");
     const { ok, error } = response.data || {};
     if (!ok && error === 'invalid_auth') {

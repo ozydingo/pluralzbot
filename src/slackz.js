@@ -157,7 +157,7 @@ function reauth({ userId, channel }) {
   };
 }
 
-function edit({ token, channel, ts, newText }) {
+function editMessage({ token, channel, ts, newText }) {
   const data = {
     text: newText,
     ts: ts,
@@ -255,7 +255,7 @@ module.exports = {
   acknowledgeOauth,
   acknowledgePrefs,
   cancelOauth,
-  edit,
+  editMessage,
   exchangeOauthCode,
   reauth,
   suggestion,
