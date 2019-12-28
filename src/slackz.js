@@ -2,8 +2,6 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 
-const pluralz = require('./pluralz');
-
 const authHeaders = (token) => ({
   "Authorization": `Bearer ${token}`,
   "Content-type": "application/json; charset=utf-8",
@@ -158,9 +156,9 @@ exports.reauth = ({ userId, channel }) => {
   };
 }
 
-exports.correction = ({ ts, text, channel, token }) => {
+exports.edit = ({ token, channel, ts, newText }) => {
   const data = {
-    text: pluralz.replace(text),
+    text: newText,
     ts: ts,
     channel: channel,
     as_user: true,
