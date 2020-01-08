@@ -15,8 +15,6 @@ exports.main = async (req, res) => {
   }
 
   const { body, query } = req;
-  console.log("Body", body);
-  console.log("Query", query);
 
   // TODO: not all POSTS have the token. Figure this out.
   // if (body.token !== VERIFICATION_TOKEN) {
@@ -36,6 +34,6 @@ exports.main = async (req, res) => {
   } else if (query.action === 'oauth') {
     await OauthController.respond(req, res);
   } else {
-    res.status(404).send('No action to perform.');
+    res.status(404).send(`No action to perform for action ${query.action}.`);
   }
 };
