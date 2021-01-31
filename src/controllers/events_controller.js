@@ -9,17 +9,18 @@ const { Pluralz } = require('../pluralz');
 async function respond(req, res) {
   const { body } = req;
   if (!body.event) {
+    console.log("No event detected in body; abort.");
     res.status(200).send();
     return;
   }
 
   res.status(200).write('');
+  console.log("Handling event: " + JSON.stringify(body.event));
   await handleEvent(body.event);
   res.end();
 }
 
 async function handleEvent(event) {
-  console.log("Handling event", event);
   const { text } = event;
 
   if (event.type === 'app_mention') {

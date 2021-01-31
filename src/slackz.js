@@ -222,7 +222,7 @@ function exchangeOauthCode(code) {
 }
 
 function acknowledgeOauth({ ok, message, state }) {
-  console.log("Oauth ack:", state);
+  console.log("Oauth ack: " + JSON.stringify(state));
   const { response_url, channel, user_id: userId } = state;
 
   // If oauth did not succeed or was not granted, ask again.

@@ -6,17 +6,18 @@ const userz = require('../userz');
 async function respond(req, res) {
   const { body } = req;
   if (!body.payload) {
+    console.log("Body contains no payload; abort.");
     res.status(200).send();
     return;
   }
 
   res.status(200).write('');
+  console.log(`Handling response: ${body.payload}`);
   await handleResponse(body.payload);
   res.end();
 }
 
 async function handleResponse(payloadStr) {
-  console.log("Handling response", payloadStr);
   const payload = JSON.parse(payloadStr);
   if (payload.type !== "block_actions") { return; }
 

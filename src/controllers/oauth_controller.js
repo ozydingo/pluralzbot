@@ -15,9 +15,9 @@ async function respond(req, res) {
 }
 
 async function handleOauthRedirect({ code, state }) {
-  console.log("Handling oauth", code ? "<CODE>" : undefined);
+  console.log("Handling oauth: code = ", code ? "yes" : "no");
   const { data } = await axios(slackz.exchangeOauthCode(code));
-  console.log("Oauth response: ", data);
+  console.log("Oauth response: " + JSON.stringify(data));
 
   const { response_url, channel, user_id } = JSON.parse(state);
 
@@ -34,7 +34,7 @@ async function handleOauthRedirect({ code, state }) {
     await userz.setToken(userId, token, {name: user.name});
     result = {ok: true, message: "Good to go! From now on, I'll automatically correct your errorz. Type `/pluralz` if you change your mind."};
   }
-  console.log("Oauth result:", result);
+  console.log("Oauth result: " + JSON.stringify(result));
   await axios(slackz.acknowledgeOauth({
     ok,
     message: result.message,
