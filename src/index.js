@@ -6,6 +6,8 @@ const OauthController = require('./controllers/oauth_controller');
 const ResponsesController = require('./controllers/responses_controller');
 const VerificationController = require('./controllers/verification_controller');
 
+const { InvalidTokenError } = require('./verification');
+
 // Main event function handler
 exports.main = async (req, res) => {
   const { body, query } = req;
@@ -20,13 +22,20 @@ exports.main = async (req, res) => {
     return;
   }
 
-  // TODO: not all POSTS have the token. Figure this out.
-  // if (body.token !== VERIFICATION_TOKEN) {
-  //   res.status(501).send('Unauthorised request.');
-  //   return;
-  // }
+  await route(req, res).catch(err => {
+    if (err instanceof InvalidTokenError) {
+      console.log("Request did not contain a valid token. Reject.");
+      res.status(401).send('Unauthorized.');
+    } else {
+      console.error(`Error handling request: ${err}`);
+      res.status(500).send('Unknown error.');
+    }
+  });
+};
 
-  // Allow re-verification of URL by Slack
+async function route(req, res) {
+  const { body, query } = req;
+
   if (body.challenge) {
     console.log("Body contains a challenge; responding.");
     await VerificationController.respond(req, res);
@@ -46,4 +55,4 @@ exports.main = async (req, res) => {
     console.log(`No action (value is ${query.action}); abort.`);
     res.status(404).send(`No action to perform for action ${query.action}.`);
   }
-};
+}

@@ -3,11 +3,14 @@ const interactionz = require('../interactionz');
 const { logError, logResponse } = require('../logging');
 const slackz = require('../slackz');
 const userz = require('../userz');
+const { validateToken } = require('../verification');
 
 const { Pluralz } = require('../pluralz');
 
 async function respond(req, res) {
   const { body } = req;
+  validateToken(body.token);
+
   if (!body.event) {
     console.log("No event detected in body; abort.");
     res.status(200).send();

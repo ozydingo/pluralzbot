@@ -2,6 +2,7 @@ const axios = require('axios');
 const { logError, logResponse } = require('../logging');
 const slackz = require('../slackz');
 const userz = require('../userz');
+const { validateToken } = require('../verification');
 
 async function respond(req, res) {
   const { body } = req;
@@ -10,6 +11,7 @@ async function respond(req, res) {
     res.status(200).send();
     return;
   }
+  validateToken(body.payload.token);
 
   res.status(200).write('');
   console.log(`Handling response: ${body.payload}`);
