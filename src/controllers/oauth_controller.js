@@ -21,7 +21,7 @@ async function handleOauthRedirect({ code, state }) {
 
   const { response_url, channel, user_id } = JSON.parse(state);
 
-  const { ok, authed_user: user = {} } = data;
+  const { ok, team, authed_user: user = {} } = data;
   const { id: userId, scope, access_token: token, token_type } = user;
   let result;
   if (!ok) {
@@ -31,7 +31,7 @@ async function handleOauthRedirect({ code, state }) {
   } else if (token_type !== 'user') {
     result = {ok: false, message: 'Hm, I got an incorrect token type. Please try again.'};
   } else {
-    await userz.setToken(userId, token, {name: user.name});
+    await userz.setToken(token, {userId: userId, teamId: team.id, name: user.name});
     result = {ok: true, message: "Good to go! From now on, I'll automatically correct your errorz. Type `/pluralz` if you change your mind."};
   }
   console.log("Oauth result: " + JSON.stringify(result));

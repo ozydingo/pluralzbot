@@ -1,0 +1,20 @@
+{
+  "query": {
+    "action": "command"
+  },
+  "body": {
+    "channel_name": "pluralz-public",
+    "api_app_id": "A[...]",
+    "team_domain": "[...]",
+    "command": "/pluralz",
+    "response_url": "https://hooks.slack.com/commands/[...]",
+    "is_enterprise_install": "false",
+    "team_id": "T[...]",
+    "trigger_id": "[...]",
+    "token": "[...]",
+    "channel_id": "C[...]",
+    "user_id": "U[...]",
+    "user_name": "schwartz.andrew.h",
+    "text": ""
+  }
+}

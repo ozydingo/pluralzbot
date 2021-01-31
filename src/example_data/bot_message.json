@@ -1,0 +1,81 @@
+{
+  "body": {
+    "event_id": "Ev[...]",
+    "token": "[...]",
+    "authorizations": [
+      {
+        "enterprise_id": null,
+        "is_enterprise_install": false,
+        "user_id": "U[...]",
+        "team_id": "T[...]",
+        "is_bot": true
+      }
+    ],
+    "is_ext_shared_channel": false,
+    "event_time": 1612118895,
+    "event_context": "1-message-T[...]-C[...]",
+    "api_app_id": "A[...]",
+    "event": {
+      "ts": "",
+      "channel_type": "channel",
+      "channel": "C[...]",
+      "event_ts": "1612118895.000500",
+      "message": {
+        "subtype": "bot_message",
+        "text": "This content can't be displayed.",
+        "ts": "1612118760.000500",
+        "is_ephemeral": true,
+        "bot_id": "B[...]",
+        "type": "message",
+        "blocks": [
+          {
+            "block_id": "JOsZ",
+            "text": {
+              "text": "Sure! To get started, you'll need to authorize me to edit your messagez.",
+              "type": "mrkdwn",
+              "verbatim": false
+            },
+            "type": "section"
+          },
+          {
+            "type": "actions",
+            "elements": [
+              {
+                "action_id": "MEU",
+                "text": {
+                  "type": "plain_text",
+                  "text": "Grant access",
+                  "emoji": true
+                },
+                "style": "primary",
+                "value": "grant",
+                "type": "button",
+                "url": "https://slack.com/oauth/v2/authorize?[...]"
+              },
+              {
+                "type": "button",
+                "text": {
+                  "type": "plain_text",
+                  "text": "Cancel",
+                  "emoji": true
+                },
+                "value": "cancel",
+                "action_id": "V7t7y"
+              }
+            ],
+            "block_id": "oauth-access"
+          }
+        ],
+        "user": "U[...]"
+      },
+      "type": "message",
+      "subtype": "message_changed",
+      "hidden": true
+    },
+    "type": "event_callback",
+    "team_id": "T[...]"
+  },
+  "query": {
+    "action": "event"
+  }
+}

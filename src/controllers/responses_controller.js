@@ -37,7 +37,7 @@ async function handleResponse(payloadStr) {
 function setPrefs({ user, value, response_url }) {
   console.log(`Setting user ${user.id} to ${value}`);
   return Promise.all([
-    userz.setParticipation(user.id, value, {name: user.name}),
+    userz.setParticipation(value, {userId: user.id, teamId: user.team_id, name: user.name}),
     axios(slackz.acknowledgePrefs({ value, response_url })).then(response => {
       logResponse(response, "user interaction");
     }).catch(err => {
@@ -46,8 +46,8 @@ function setPrefs({ user, value, response_url }) {
   ]);
 }
 
-function setUsername({ id, name }) {
-  return userz.setName(id, name);
+function setUsername({ id, team_id, name }) {
+  return userz.setName(name, {userId: id, teamId: team_id});
 }
 
 function handleOauthRequest({ user, response_url, value }) {
@@ -59,7 +59,7 @@ function handleOauthRequest({ user, response_url, value }) {
     });
   } else if (value === 'cancel') {
     return Promise.all([
-      userz.setParticipation(user.id, 'remind', {name: user.name}),
+      userz.setParticipation('remind', {userId: user.id, teamId: user.team_id, name: user.name}),
       axios(slackz.cancelOauth({ response_url })).then(response => {
         logResponse(response, "cancel oauth");
       }).catch(err => {

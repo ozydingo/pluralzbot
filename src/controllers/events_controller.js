@@ -39,8 +39,8 @@ async function handleEvent(event) {
 }
 
 async function handlePlurals(event, pluralz) {
-  const { ts, text, channel, user: userId } = event;
-  const user = await userz.find_or_create(userId);
+  const { ts, text, channel, user: userId, team: teamId } = event;
+  const user = await userz.find_or_create({userId, teamId});
   const userData = user.data();
   const lastEventId = userData.lastEventId;
   const requests = [];
@@ -61,10 +61,10 @@ async function handlePlurals(event, pluralz) {
     requests.push(correctPluralz({ userId, ts, newText: pluralz.replace(text), channel, token: userData.token }));
   } else if (action === "reauth") {
     console.log(`Pluralz: requesting token for user ${userId}.`);
-    requests.push(reauth({ userId, channel }));
+    requests.push(reauth({ userId, teamId, channel }));
   } else if (action === "suggest") {
     console.log(`Pluralz: time to bug user ${userId}! Last bug time: ${userData.bugged_at && userData.bugged_at.toDate()}`);
-    requests.push(suggestPluralz({ userId, channel }));
+    requests.push(suggestPluralz({ userId, teamId, channel }));
   } else {
     console.log(`Pluralz: we're hiding from user ${userId}.`);
   }
@@ -91,9 +91,9 @@ function reactToMessage(event, reaction) {
   });
 }
 
-function suggestPluralz({ userId, channel }) {
+function suggestPluralz({ userId, teamId, channel }) {
   return axios(slackz.suggestion({ userId, channel })).then(response => {
-    userz.touch(userId);
+    userz.touch({userId, teamId});
     logResponse(response, "suggestion");
   }).catch(err => {
     logError(err, "suggestion");
@@ -113,8 +113,8 @@ function correctPluralz({ userId, ts, newText, channel, token }) {
   });
 }
 
-function reauth({ userId, channel }) {
-  return axios(slackz.reauth({ userId, channel })).then(response => {
+function reauth({ userId, teamId, channel }) {
+  return axios(slackz.reauth({ userId, teamId, channel })).then(response => {
     userz.touch(userId);
     logResponse(response, "reauth");
   }).catch(err => {

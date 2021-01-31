@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "app_id": "A[...]",
+  "authed_user": {
+    "id": "U[...]",
+    "scope": "chat:write",
+    "access_token": "xoxp-[...]",
+    "token_type": "user"
+  },
+  "team": {
+    "id": "T[...]",
+    "name": "A Big Stick"
+  },
+  "enterprise": null,
+  "is_enterprise_install": false
+}

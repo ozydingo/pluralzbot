@@ -1,0 +1,52 @@
+{
+  "body": {
+    "event_context": "1-message-T[...]-C[...]",
+    "is_ext_shared_channel": false,
+    "event_time": 1612118518,
+    "authorizations": [
+      {
+        "is_bot": true,
+        "team_id": "T[...]",
+        "user_id": "U[...]",
+        "enterprise_id": null,
+        "is_enterprise_install": false
+      }
+    ],
+    "type": "event_callback",
+    "event_id": "Ev[...]",
+    "api_app_id": "A[...]",
+    "team_id": "T[...]",
+    "token": "[...]",
+    "event": {
+      "user": "U[...]",
+      "channel_type": "channel",
+      "channel": "C[...]",
+      "client_msg_id": "[...uuid...]",
+      "text": "test",
+      "ts": "1612118518.000200",
+      "team": "T[...]",
+      "event_ts": "1612118518.000200",
+      "blocks": [
+        {
+          "elements": [
+            {
+              "elements": [
+                {
+                  "type": "text",
+                  "text": "test"
+                }
+              ],
+              "type": "rich_text_section"
+            }
+          ],
+          "type": "rich_text",
+          "block_id": "gDB"
+        }
+      ],
+      "type": "message"
+    }
+  },
+  "query": {
+    "action": "event"
+  }
+}

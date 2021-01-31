@@ -1,0 +1,8 @@
+{
+  "query": {
+    "state": "{\"response_url\":\"https://hooks.slack.com/actions/T[...]/169[...]/Blg[...]\"}",
+    "action": "oauth",
+    "code": "[...]"
+  },
+  "body": {}
+}

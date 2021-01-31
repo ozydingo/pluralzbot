@@ -1,0 +1,8 @@
+{
+  "query": {
+    "action": "response"
+  },
+  "body": {
+    "payload": "{\"type\":\"block_actions\",\"user\":{\"id\":\"U[...]\",\"username\":\"[...]\",\"name\":\"[...]\",\"team_id\":\"T[...]\"},\"api_app_id\":\"A[...]\",\"token\":\"[...]\",\"container\":{\"type\":\"message\",\"message_ts\":\"1612118760.000500\",\"channel_id\":\"C[...]\",\"is_ephemeral\":true},\"trigger_id\":\"[...]\",\"team\":{\"id\":\"T[...]\",\"domain\":\"[...]\"},\"enterprise\":null,\"is_enterprise_install\":false,\"channel\":{\"id\":\"C[...]\",\"name\":\"pluralz-public\"},\"response_url\":\"https:\\/\\/hooks.slack.com\\/actions\\/[...]\",\"actions\":[{\"action_id\":\"GBO\",\"block_id\":\"set-prefs\",\"text\":{\"type\":\"plain_text\",\"text\":\"Correct me\",\"emoji\":true},\"value\":\"autocorrect\",\"style\":\"primary\",\"type\":\"button\",\"action_ts\":\"1612118892.809091\"}]}"
+  }
+}

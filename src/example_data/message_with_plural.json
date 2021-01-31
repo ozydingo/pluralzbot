@@ -1,0 +1,52 @@
+{
+  "body": {
+    "api_app_id": "A[...]",
+    "event": {
+      "channel_type": "channel",
+      "blocks": [
+        {
+          "elements": [
+            {
+              "type": "rich_text_section",
+              "elements": [
+                {
+                  "text": "tests",
+                  "type": "text"
+                }
+              ]
+            }
+          ],
+          "block_id": "PxtL",
+          "type": "rich_text"
+        }
+      ],
+      "channel": "C[...]",
+      "ts": "1612118755.000400",
+      "client_msg_id": "[...]",
+      "event_ts": "1612118755.000400",
+      "team": "T[...]",
+      "user": "U[...]",
+      "type": "message",
+      "text": "tests"
+    },
+    "event_context": "1-message-T[...]-C[...]",
+    "is_ext_shared_channel": false,
+    "type": "event_callback",
+    "token": "[...]",
+    "event_id": "Ev[...]",
+    "authorizations": [
+      {
+        "team_id": "T[...]",
+        "is_enterprise_install": false,
+        "user_id": "U[...]",
+        "is_bot": true,
+        "enterprise_id": null
+      }
+    ],
+    "event_time": 1612118755,
+    "team_id": "[...]"
+  },
+  "query": {
+    "action": "event"
+  }
+}
