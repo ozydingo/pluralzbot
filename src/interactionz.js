@@ -1,5 +1,6 @@
-const bug_timeout = Number(process.env.BUG_TIMEOUT || 1);
+const bug_timeout = Number(process.env.BUG_TIMEOUT || 15);
 const BUG_TIMEOUT_MILLIS = bug_timeout * 60 * 1000;
+const REACTION_PROB = Number(process.env.REACTION_PROB || 0.35);
 
 function timeToBugAgain(buggedAt) {
   return (new Date() - buggedAt) > BUG_TIMEOUT_MILLIS;
@@ -20,7 +21,7 @@ function messageAction(userData) {
 }
 
 function ignorePluralz() {
-  return Math.random() < 0.35;
+  return Math.random() < REACTION_PROB;
 }
 
 module.exports = {

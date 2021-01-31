@@ -16,7 +16,7 @@ Pluralzbot consists of a single Google Cloud Function and a Google Firestore dat
 
 ## Development
 
-Note: these instructions are for setting up the app from scratch. If you are just trying to use the app in your workspace, skip this section.
+Note: these instructions are for setting up the app from scratch. If you are just trying to use the app in your workspace, simply search for it in Slack.
 
 ### Code Setup
 
@@ -24,7 +24,7 @@ Note: these instructions are for setting up the app from scratch. If you are jus
 * Run `npm install` in install package dependencies.
 * Run `npm run lint` to lint your code.
 * Run `npm run test` to run the test suite.
-  * Beware, it only covers some basic isolated logic. The benefit of testing the specific Slack inbound and outbound messages is questionable, and of testing Firestore interactions was more than I cared to take on.
+  * Be warned: the test suite is limited and does not yet cover the Slack and Firestore interactions due to cost/benefit of mocking these features' responses.
 
 ### Initialize Slack App
 
@@ -41,11 +41,9 @@ Before we set up our Google Cloud infrastructure, we need to set up a few things
 * Copy the "Bot Token" value into the gitignored file`src/env/secrets.yml`
   * `BOT_TOKEN: xoxb-...`
 * Go to "Basic Information", and copy the client id, secret, and verification token into `src/env/secrets.yml` using the following keys:
-  * `CLIENT_ID` -- note!, quote this value, since it will otherwise be parsed as a Float!
+  * `CLIENT_ID` -- note!, quote this value, since it will otherwise be parsed as a Float.
   * `CLIENT_SECRET`
   * `VERIFICATION_TOKEN`
-* Add `BUG_TIMEOUT: 15` to `src/env/secrets.yml`. This is nota secret, but GCP Functions only supports a single env file as of this writing.
-  * TODO: Store secrets more securely, use env file only for non-secret environment setup.
 
 ### App Setup on Google Cloud
 
@@ -61,10 +59,10 @@ gcloud firestore databases create --region=us-east1
 
 #### Google Cloud Functions
 
-Deploy the function. Here, we're deploying it from a Google Code Repository; change this as you require. Note: this step requires you to enable the Cloud Build API in GCP.
+Deploy the function. Here, we're deploying it from local disk; see appendix for deploying from its Google Cloud Repository instead for a more stable deploy process.
 
 ```sh
-gcloud functions deploy pluralz --region us-east1 --trigger-http --allow-unauthenticated --runtime nodejs14 --source https://source.developers.google.com/projects/enhanced-optics-219215/repos/pluralz/moveable-aliases/master/paths/src/ --entry-point main --env-vars-file ./env/secrets.yml
+gcloud functions deploy pluralz --region us-east1 --trigger-http --allow-unauthenticated --runtime nodejs14 --source . --entry-point main --env-vars-file ./env/secrets.yml
 ```
 
 Alternatively, set up the cloud function in the GCP console, copying the source path, entry point, and environment variables from the command above.
@@ -76,10 +74,6 @@ gcloud functions describe pluralz --format="value(httpsTrigger.url)"
 ```
 
 This should look like `https://enhanced-optics-219215.cloudfunctions.net/pluralz`. We'll copy this into our Slack app.
-
-Lastly, give the function permission to read and write to our Firestore database:
-
-<!-- TODO --- THIS -->
 
 ### Connect Slack App
 
@@ -99,7 +93,16 @@ We'll use the same function for challenge verification, event subscription, and 
   * `channels.history`
   * `commands`
   * `groups.history`
+* Lastly, add the app to a channel in Slack.
 
-### Notes
+The app should be good to go! Try typing a message like "I like words" in a channel that has PluralzBot added, and you should see it spring into action.
+
+### Appendix
 
 See the `example_data` directory for example data from various responnse types.
+
+To deploy the function from its Google Cloud Repository, use the following `gcloud` invocation. Note: this step requires you to enable the Cloud Build API in GCP.
+
+```sh
+gcloud functions deploy pluralz --region us-east1 --trigger-http --allow-unauthenticated --runtime nodejs14 --source https://source.developers.google.com/projects/enhanced-optics-219215/repos/pluralz/moveable-aliases/master/paths/src/ --entry-point main --env-vars-file ./env/secrets.yml
+```

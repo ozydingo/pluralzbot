@@ -16,6 +16,7 @@ async function respond(req, res) {
 
   res.status(200).write('');
   console.log("Handling event: " + JSON.stringify(body.event));
+  console.log(`Event type: ${body.event.type}`);
   await handleEvent(body.event);
   res.end();
 }
@@ -23,16 +24,19 @@ async function respond(req, res) {
 async function handleEvent(event) {
   const { text } = event;
 
-  if (event.type === 'app_mention') {
-    return reactToMessage(event, "bananadance");
-  } else if (event.type === "message" && !event.subtype) {
+  if (event.type === "message" && !event.subtype) {
     const actions = [];
     const pluralz = new Pluralz(text);
     if (pluralz.hasPlurals()) {
+      console.log("Text contains plurals to be corrected.");
       actions.push(handlePlurals(event, pluralz));
     }
     if (pluralz.hasPluralz()) {
+      console.log("Text contains pluralz to be commended.");
       actions.push(handlePluralz(event));
+    }
+    if (actions.length === 0) {
+      console.log("No action to perform.");
     }
     return Promise.all(actions);
   }
@@ -78,7 +82,7 @@ function handlePluralz(event) {
     return;
   }
 
-  return reactToMessage(event, "3play");
+  return reactToMessage(event, "zzz");
 }
 
 function reactToMessage(event, reaction) {

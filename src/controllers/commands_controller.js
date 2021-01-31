@@ -6,7 +6,7 @@ const userz = require('../userz');
 async function respond(req, res) {
   const { body } = req;
   res.status(200).write('');
-  console.log(`Handling command from user ${body.user_id} in channel ${body.channel_id}.`);
+  console.log(`Handling command '${body.command}' from user ${body.user_id} in channel ${body.channel_id}.`);
   await handleCommand(body);
   res.end();
 }
