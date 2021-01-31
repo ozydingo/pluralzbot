@@ -1,6 +1,6 @@
 const Firestore = require('@google-cloud/firestore');
-const PROJECTID = 'playground-252414';
-const COLLECTION_NAME = '3playaz';
+const PROJECTID = 'enhanced-optics-219215';
+const COLLECTION_NAME = 'userz';
 const firestore = new Firestore({
   projectId: PROJECTID,
 });

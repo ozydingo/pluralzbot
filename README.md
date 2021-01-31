@@ -1,55 +1,106 @@
 # PluralzBot
-A Slack app to obnoxiously ask to change your messages for you. Slack + Google Cloud Functions + Google Firestore.
+
+## Overview
+
+A Slack app that will obnoxiously change your messagez spellingz. What could go wrong?
 
 ## What is doez
 
-PluralzBot will watch your messages in installed channels for any messages that end in a plural word spelled with an 's'. It will then ~obnoxiously~ kindly suggest you change this spelling to end in a 'z'. If you authorize it, it will automatically correct these errorz for you.
+PluralzBot will watch your messages in installed channelz for any messagez that contain plural wordz incorrectly spelled with an "s". Then, if authorized, it will autobnoxiously correct your spelling to end your wordz with a "z".
 
-You can tell PluralzBot to stop bugging you at any time. Either use the buttons presented in its gentle inquiry or summon in using `/pluralz`
+But, more seriously, Pluralzbot is opt-in, and  gives you the option to permanently dismiss its prompts.Simply summon the bot's suggestions  using the `/pluralz` slash command enabled in your workspace.
 
-## Code Setup
+## Where it livez
 
-* Type `npm install` from `/src` to install the needed dependencies locally.
+Pluralzbot consists of a single Google Cloud Function and a Google Firestore database. The function is deployed from its [google cloudrepository](https://source.developers.google.com/p/enhanced-optics-219215/r/pluralz).
+
+## Development
+
+Note: these instructions are for setting up the app from scratch. If you are just trying to use the app in your workspace, skip this section.
+
+### Code Setup
+
+* Navigate to `/src`
+* Run `npm install` in install package dependencies.
 * Run `npm run lint` to lint your code.
 * Run `npm run test` to run the test suite.
   * Beware, it only covers some basic isolated logic. The benefit of testing the specific Slack inbound and outbound messages is questionable, and of testing Firestore interactions was more than I cared to take on.
 
-## App Setup
+### Initialize Slack App
 
-PluralzBot is hosted on Google Cloud Platform using a Node.js 8 runtime cloud function and a Firestore database to hold user preferences. It is deployed via a Google Source Repository ([here](https://source.cloud.google.com/playground-252414/pluralzbot)). More details as follows:
+Before we set up our Google Cloud infrastructure, we need to set up a few things in Slack, including the app identity and secrets.
 
-* Set the function's source repository and branch (master unless you have a better idea).
-* Set the directory with source code to `/src`.
-* Set "Function to execute" to `main`.
-  * This function will automatically detect if Slack is sending a verification challenge and respond accordingly, so you don't have to worry about that.
-* Set up the following environment variables
-  * `BOT_TOKEN`: the oauth token labeled "bot" in your Slack app. This is needed to perform most of PuralzBot's primary actions.
-  * `CHANNEL_WHITELIST`: a comma-separated list of channel ids that PluralzBot will respond to. This is for safety -- this is an obnoxious app.
-  * `CLIENT_ID`: from your Slack app's basic info. This is needed when a user is authorizing the application to autocorrect their messages.
-  * `CLIENT_SECRET`: from your Slack app's basic info. This is needed when a user is authorizing the application to autocorrect their messages.
-  * `BUG_TIMEOUT`: minimum time, in minutes, between responses that PluralzBot will send to a given user when they are not set to ignore or autocorrect. Let's not be *too* obnoxious.
-  * `VERIFICATION_TOKEN`: from your Slack app's info. This verifies that requests are coming from Slack. (TODO: implement signature verification.)
+* [Create the Slack app](https://api.slack.com/apps).
+* Upload the [logo](./assets/logo.png) and use background color #269ba3.
+* In Oauth/Scopes, Create a [bot token](https://api.slack.com/bot-users) and add the following bot scopes:
+  * Add the `chat.write` scope to allow PluralzBot to ask members for authorization to correct their pluralz.
+  * Add `reactions.write` to allow PluralzBot to react when members use the correct endingz for plural wordz.
+* Add user token scopes:
+  * Add `chat.write` to allow PluralzBot to update authorized users' chatz.
+* Install the app to your test workspace to generate tokens.
+* Copy the "Bot Token" value into the gitignored file`src/env/secrets.yml`
+  * `BOT_TOKEN: xoxb-...`
+* Go to "Basic Information", and copy the client id, secret, and verification token into `src/env/secrets.yml` using the following keys:
+  * `CLIENT_ID` -- note!, quote this value, since it will otherwise be parsed as a Float!
+  * `CLIENT_SECRET`
+  * `VERIFICATION_TOKEN`
+* Add `BUG_TIMEOUT: 15` to `src/env/secrets.yml`. This is nota secret, but GCP Functions only supports a single env file as of this writing.
+  * TODO: Store secrets more securely, use env file only for non-secret environment setup.
 
-## Slack Setup
+### App Setup on Google Cloud
 
-* Set up the Slack app to subscribe to the following events:
-  * `message.channels`
-  * `message.groups`
-* Set the event subscription URL to be the function's trigger with `?action=event` appended.
-* Give the Slack app the following scopes:
-  * bot
-  * commands
-  * channels:history
-  * groups:history
-  * chat:write:user
-  * chat:write:bot
-* Set up the oauth redirect URL to the same function's trigger address with `?action=oauth` appended.
-* Set up a slack command `/pluralz` with a request URL of the function's trigger with `?action=command` appended.
-* Enabled Interactive Components with a request URL of the function's trigger with `?action=response` appended.
-* Add a bot user.
-* Set your app's logo to the image file contained in `assets/logo.png`.
+We're now ready to deploy our GCP stack that will power our app.
 
-## Notes
+#### Firstore Database
+
+We'll store information on who has authorized PluralzBot to correct and who has told PluralzBot to bug off in a [Firestore Database](https://cloud.google.com/firestore). Create one in the console or via the CLI using
+
+```sh
+gcloud firestore databases create --region=us-east1
+```
+
+#### Google Cloud Functions
+
+Deploy the function. Here, we're deploying it from a Google Code Repository; change this as you require. Note: this step requires you to enable the Cloud Build API in GCP.
+
+```sh
+gcloud functions deploy pluralz --region us-east1 --trigger-http --allow-unauthenticated --runtime nodejs14 --source https://source.developers.google.com/projects/enhanced-optics-219215/repos/pluralz/moveable-aliases/master/paths/src/ --entry-point main --env-vars-file ./env/secrets.yml
+```
+
+Alternatively, set up the cloud function in the GCP console, copying the source path, entry point, and environment variables from the command above.
+
+Get the function trigger URL:
+
+```sh
+gcloud functions describe pluralz --format="value(httpsTrigger.url)"
+```
+
+This should look like `https://enhanced-optics-219215.cloudfunctions.net/pluralz`. We'll copy this into our Slack app.
+
+Lastly, give the function permission to read and write to our Firestore database:
+
+<!-- TODO --- THIS -->
+
+### Connect Slack App
+
+We'll use the same function for challenge verification, event subscription, and oauth handling because the amount of shared code between these handlers outweighs their differences. To keep things tidy, each URL will have an `action=<ACTION>` parameter, and these are parsed immediately in `index.js:main` and routed to the correct function imported from `controllers`.
+
+* Add an OAuth Redirect URL to allow users to grant permission to PluralzBot.
+  * `https://us-central1-enhanced-optics-219215.cloudfunctions.net/pluralz?action=oauth`
+* Enable "Event Subscription".
+  * Add the URL `https://us-central1-enhanced-optics-219215.cloudfunctions.net/pluralz?action=event`
+* Subscribe to the `message.channels` and `message.groups` bot events. We're leaving out IM and MPIM since pluralzBot is most effective in named channels, not direct messages.
+* Add a slash command, `/pluralz`
+  * URL: `https://us-central1-enhanced-optics-219215.cloudfunctions.net/pluralz?action=command`
+  * Description: "Modify your Pluralz settingz"
+* Enabled interactivity.
+  * URL: `https://us-central1-enhanced-optics-219215.cloudfunctions.net/pluralz?action=response`
+* Reinstall the app to gain new scopes. You may notice that the actions above have caused Slack to automatically add the following scopes:
+  * `channels.history`
+  * `commands`
+  * `groups.history`
+
+### Notes
 
 This is what a message post event looks like to the function:
 
