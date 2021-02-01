@@ -11,16 +11,16 @@ async function respond(req, res) {
     res.status(200).send();
     return;
   }
-  validateToken(body.payload.token);
+  const payload = JSON.parse(body.payload);
+  validateToken(payload.token);
 
   res.status(200).write('');
   console.log(`Handling response: ${body.payload}`);
-  await handleResponse(body.payload);
+  await handleResponse(payload);
   res.end();
 }
 
-async function handleResponse(payloadStr) {
-  const payload = JSON.parse(payloadStr);
+async function handleResponse(payload) {
   if (payload.type !== "block_actions") { return; }
 
   const { user, response_url, actions } = payload;

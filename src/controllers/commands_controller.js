@@ -14,9 +14,9 @@ async function respond(req, res) {
   res.end();
 }
 
-async function handleCommand({ user_id: userId, channel_id: channel }) {
+async function handleCommand({ user_id: userId, team_id: teamId, channel_id: channel }) {
   await axios(slackz.settingsInquiry({ userId, channel })).then(response => {
-    userz.touch(userId);
+    userz.touch({userId, teamId});
     logResponse(response, "suggestion");
   }).catch(err => {
     logError(err, "suggestion");

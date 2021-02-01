@@ -122,7 +122,7 @@ function correctPluralz({ userId, ts, newText, channel, token }) {
 
 function reauth({ userId, teamId, channel }) {
   return axios(slackz.reauth({ userId, teamId, channel })).then(response => {
-    userz.touch(userId);
+    userz.touch({userId, teamId});
     logResponse(response, "reauth");
   }).catch(err => {
     logError(err, "reauth");
