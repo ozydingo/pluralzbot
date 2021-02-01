@@ -10,9 +10,9 @@ PluralzBot will watch your messages in installed channelz for any messagez that 
 
 But, more seriously, Pluralzbot is opt-in, and  gives you the option to permanently dismiss its prompts.Simply summon the bot's suggestions  using the `/pluralz` slash command enabled in your workspace.
 
-## Where it livez
+## What makez it go
 
-Pluralzbot consists of a single Google Cloud Function and a Google Firestore database. The function is deployed from its [google cloudrepository](https://source.developers.google.com/p/enhanced-optics-219215/r/pluralz).
+Pluralzbot consists of a single Google Cloud Function and a Google Firestore database.
 
 ## Development
 
@@ -32,11 +32,12 @@ Before we set up our Google Cloud infrastructure, we need to set up a few things
 
 * [Create the Slack app](https://api.slack.com/apps).
 * Upload the [logo](./assets/logo.png) and use background color #269ba3.
-* In Oauth/Scopes, Create a [bot token](https://api.slack.com/bot-users) and add the following bot scopes:
-  * Add the `chat.write` scope to allow PluralzBot to ask members for authorization to correct their pluralz.
-  * Add `reactions.write` to allow PluralzBot to react when members use the correct endingz for plural wordz.
-* Add user token scopes:
-  * Add `chat.write` to allow PluralzBot to update authorized users' chatz.
+* In Oauth/Scopes, Create a [bot token](https://api.slack.com/bot-users).
+* Add the following bot scopes:
+  * `chat:write` -- allow PluralzBot to respond with messages.
+  * `reactions:write` -- allow PluralzBot to react to pluralz.
+* Add user scopes:
+  * `chat.write` -- allow PluralzBot to auto-correct users' chatz.
 * Install the app to your test workspace to generate tokens.
 * Copy the "Bot Token" value into the gitignored file`src/env/secrets.yml`
   * `BOT_TOKEN: xoxb-...`
@@ -65,7 +66,7 @@ Deploy the function. Here, we're deploying it from local disk; see appendix for 
 gcloud functions deploy pluralz --region us-east1 --trigger-http --allow-unauthenticated --runtime nodejs14 --source . --entry-point main --env-vars-file ./env/secrets.yml
 ```
 
-Alternatively, set up the cloud function in the GCP console, copying the source path, entry point, and environment variables from the command above.
+(Alternatively, use the GCP console to the same effect.)
 
 Get the function trigger URL:
 
@@ -77,25 +78,24 @@ This should look like `https://enhanced-optics-219215.cloudfunctions.net/pluralz
 
 ### Connect Slack App
 
-We'll use the same function for challenge verification, event subscription, and oauth handling because the amount of shared code between these handlers outweighs their differences. To keep things tidy, each URL will have an `action=<ACTION>` parameter, and these are parsed immediately in `index.js:main` and routed to the correct function imported from `controllers`.
+For simplicity and code-sharing, we use the same function with different query parameters for various actions from Slack. The `main` function serves as a rouuterr to decide which functio in `controllers` will respond.
 
 * Add an OAuth Redirect URL to allow users to grant permission to PluralzBot.
   * `https://us-central1-enhanced-optics-219215.cloudfunctions.net/pluralz?action=oauth`
-* Enable "Event Subscription".
+* Enable "Event Subscriptions".
   * Add the URL `https://us-central1-enhanced-optics-219215.cloudfunctions.net/pluralz?action=event`
 * Subscribe to the `message.channels` and `message.groups` bot events. We're leaving out IM and MPIM since pluralzBot is most effective in named channels, not direct messages.
 * Add a slash command, `/pluralz`
   * URL: `https://us-central1-enhanced-optics-219215.cloudfunctions.net/pluralz?action=command`
   * Description: "Modify your Pluralz settingz"
-* Enabled interactivity.
+* Enable interactivity.
   * URL: `https://us-central1-enhanced-optics-219215.cloudfunctions.net/pluralz?action=response`
-* Reinstall the app to gain new scopes. You may notice that the actions above have caused Slack to automatically add the following scopes:
+* Reinstall the app to grant the following new scopes automatically added by the above actions:
   * `channels.history`
   * `commands`
   * `groups.history`
-* Lastly, add the app to a channel in Slack.
 
-The app should be good to go! Try typing a message like "I like words" in a channel that has PluralzBot added, and you should see it spring into action.
+The app should be good to go! Simply add the PluralzBot app to any channel and try typing a message like "I like words" in that channel.
 
 ### Appendix
 
